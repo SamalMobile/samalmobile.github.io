@@ -34,7 +34,7 @@ if (loginForm) {
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('login-error');
 
-        // Demo credentials (replace with your logic or Firebase for real auth)
+        // Demo credentials
         if (username === 'user' && password === 'pass123') {
             user = { username };
             localStorage.setItem('user', JSON.stringify(user));
@@ -43,6 +43,37 @@ if (loginForm) {
         } else {
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = 'Invalid username or password.';
+        }
+    });
+}
+
+// Contact form handling
+const contactForm = document.getElementById('contact-form');
+if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formError = document.getElementById('form-error');
+        const formSuccess = document.getElementById('form-success');
+
+        try {
+            const response = await fetch('https://formspree.io/f/xeozjkqj', {
+                method: 'POST',
+                body: new FormData(contactForm),
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            if (response.ok) {
+                formSuccess.classList.remove('hidden');
+                formError.classList.add('hidden');
+                contactForm.reset();
+            } else {
+                throw new Error('Form submission failed');
+            }
+        } catch (error) {
+            formError.classList.remove('hidden');
+            formSuccess.classList.add('hidden');
+            formError.textContent = 'Failed to submit form. Please try again.';
         }
     });
 }
@@ -66,7 +97,10 @@ function updateUserStatus() {
 function logout() {
     user = null;
     localStorage.removeItem('user');
+    localStorage.removeItem('cart'); // Clear cart on logout
+    cart = [];
     updateUserStatus();
+    updateCart();
     window.location.href = 'login.html';
 }
 
@@ -116,8 +150,13 @@ function displayFeaturedProducts(products) {
     }
 }
 
-// Add to cart
+// Add to cart (restricted to logged-in users)
 function addToCart(productId) {
+    if (!user) {
+        alert('Please log in to add items to the cart.');
+        window.location.href = 'login.html';
+        return;
+    }
     const product = products.find(p => p.id === productId);
     if (product) {
         cart.push(product);
@@ -155,6 +194,11 @@ function updateCart() {
 // Toggle cart visibility
 document.querySelectorAll('a[href="#cart"]').forEach(link => {
     link.addEventListener('click', () => {
+        if (!user) {
+            alert('Please log in to view the cart.');
+            window.location.href = 'login.html';
+            return;
+        }
         const cartSection = document.getElementById('cart');
         if (cartSection) {
             cartSection.classList.toggle('hidden');

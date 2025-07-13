@@ -24,12 +24,14 @@
     </nav>
     <section class="container mx-auto py-8">
         <h2 class="text-3xl font-bold text-center mb-8">Contact Us</h2>
-        <form action="https://formspree.io/f/your-form-id" method="POST" class="max-w-md mx-auto">
-            <input type="text" name="name" placeholder="Name" class="w-full p-2 mb-4 border rounded">
-            <input type="email" name="email" placeholder="Email" class="w-full p-2 mb-4 border rounded">
-            <textarea name="message" placeholder="Your Message" class="w-full p-2 mb-4 border rounded"></textarea>
+        <form action="https://formspree.io/f/xeozjkqj" method="POST" id="contact-form" class="max-w-md mx-auto">
+            <input type="text" name="name" placeholder="Name" class="w-full p-2 mb-4 border rounded" required>
+            <input type="email" name="email" placeholder="Email" class="w-full p-2 mb-4 border rounded" required>
+            <textarea name="message" placeholder="Your Message" class="w-full p-2 mb-4 border rounded" required></textarea>
             <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">Send</button>
         </form>
+        <p id="form-error" class="text-red-500 text-center mt-4 hidden">Failed to submit form. Please try again.</p>
+        <p id="form-success" class="text-green-500 text-center mt-4 hidden">Message sent successfully!</p>
         <p class="text-center mt-4">Email: support@samalmobile.com | Phone: +91 1234567890</p>
     </section>
     <script src="script.js"></script>
