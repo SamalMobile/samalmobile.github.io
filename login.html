@@ -26,7 +26,7 @@
     <section class="container mx-auto py-8">
         <h2 class="text-3xl font-bold text-center mb-8">Login</h2>
         <form id="login-form" class="max-w-md mx-auto">
-            <input type="text" id="mobile" placeholder="Mobile Number" class="w-full p-2 mb-4 border rounded" required>
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 mb-4 border rounded" required>
             <input type="password" id="password" placeholder="Password" class="w-full p-2 mb-4 border rounded" required>
             <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">Login</button>
         </form>
@@ -36,10 +36,10 @@
             <button onclick="forgetPassword()" class="text-blue-600 underline">Forget Password</button>
             <p class="mt-2">Don't have an account? <a href="signup.html" class="text-blue-600 underline">Sign Up</a></p>
         </div>
-        <p id="login-error" class="text-red-500 text-center mt-4 hidden">Invalid mobile number or password.</p>
+        <p id="login-error" class="text-red-500 text-center mt-4 hidden">Invalid email or password.</p>
         <p id="forget-user-message" class="text-center mt-4 hidden"></p>
         <p id="forget-password-message" class="text-center mt-4 hidden"></p>
     </section>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

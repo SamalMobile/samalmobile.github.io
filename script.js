@@ -1,3 +1,24 @@
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getFirestore, collection, doc, setDoc, getDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDTP7OFv5ivz4QUEAv7vu3o0sg8Pv2kscA",
+    authDomain: "samalmobile.firebaseapp.com",
+    databaseURL: "https://samalmobile-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "samalmobile",
+    storageBucket: "samalmobile.firebasestorage.app",
+    messagingSenderId: "462186581897",
+    appId: "1:462186581897:web:c9a644a4fe986a481ddb58",
+    measurementId: "G-JHFCPFDCH5"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 // Load products with error handling
 let products = [];
 const loadProducts = async () => {
@@ -19,17 +40,30 @@ const loadProducts = async () => {
 loadProducts();
 
 // Cart
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let cart = [];
 
-// Users and login state
-let users = JSON.parse(localStorage.getItem('users')) || [];
-let user = JSON.parse(localStorage.getItem('user')) || null;
-updateUserStatus();
+// User state
+let user = null;
+onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        user = userDoc.exists() ? { ...userDoc.data(), uid: firebaseUser.uid } : null;
+        if (user) {
+            const cartDoc = await getDoc(doc(db, 'carts', firebaseUser.uid));
+            cart = cartDoc.exists() ? cartDoc.data().items || [] : [];
+        }
+    } else {
+        user = null;
+        cart = [];
+    }
+    updateUserStatus();
+    updateCart();
+});
 
 // Signup form handling
 const signupForm = document.getElementById('signup-form');
 if (signupForm) {
-    signupForm.addEventListener('submit', (e) => {
+    signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
@@ -39,55 +73,73 @@ if (signupForm) {
         const errorMessage = document.getElementById('signup-error');
         const successMessage = document.getElementById('signup-success');
 
-        if (users.find(u => u.mobile === mobile || u.email === email)) {
-            errorMessage.classList.remove('hidden');
-            errorMessage.textContent = 'Mobile number or email already exists.';
-            successMessage.classList.add('hidden');
-            return;
-        }
+        try {
+            const mobileQuery = query(collection(db, 'users'), where('mobile', '==', mobile));
+            const mobileExists = await getDocs(mobileQuery);
+            if (!mobileExists.empty) {
+                errorMessage.classList.remove('hidden');
+                errorMessage.textContent = 'Mobile number already exists.';
+                successMessage.classList.add('hidden');
+                return;
+            }
 
-        users.push({ name, email, mobile, location, password });
-        localStorage.setItem('users', JSON.stringify(users));
-        successMessage.classList.remove('hidden');
-        errorMessage.classList.add('hidden');
-        signupForm.reset();
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+                name,
+                email,
+                mobile,
+                location
+            });
+            successMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            signupForm.reset();
+        } catch (error) {
+            errorMessage.classList.remove('hidden');
+            errorMessage.textContent = error.message;
+            successMessage.classList.add('hidden');
+        }
     });
 }
 
 // Login form handling
 const loginForm = document.getElementById('login-form');
 if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const mobile = document.getElementById('mobile').value;
+        const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('login-error');
 
-        const foundUser = users.find(u => u.mobile === mobile && u.password === password);
-        if (foundUser) {
-            user = foundUser;
-            localStorage.setItem('user', JSON.stringify(user));
-            updateUserStatus();
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
             window.location.href = 'index.html';
-        } else {
+        } catch (error) {
             errorMessage.classList.remove('hidden');
-            errorMessage.textContent = 'Invalid mobile number or password.';
+            errorMessage.textContent = 'Invalid email or password.';
         }
     });
 }
 
 // Forget user
-function forgetUser() {
-    const mobile = document.getElementById('mobile').value;
+async function forgetUser() {
+    const email = document.getElementById('email').value;
     const message = document.getElementById('forget-user-message');
-    const foundUser = users.find(u => u.mobile === mobile);
     message.classList.remove('hidden');
-    if (foundUser) {
-        message.textContent = `User found: ${foundUser.name}, Email: ${foundUser.email}`;
-        message.classList.remove('text-red-500');
-        message.classList.add('text-green-500');
-    } else {
-        message.textContent = 'No user found with this mobile number.';
+    try {
+        const userQuery = query(collection(db, 'users'), where('email', '==', email));
+        const userDocs = await getDocs(userQuery);
+        if (!userDocs.empty) {
+            const userData = userDocs.docs[0].data();
+            message.textContent = `User found: ${userData.name}, Mobile: ${userData.mobile}`;
+            message.classList.remove('text-red-500');
+            message.classList.add('text-green-500');
+        } else {
+            message.textContent = 'No user found with this email.';
+            message.classList.remove('text-green-500');
+            message.classList.add('text-red-500');
+        }
+    } catch (error) {
+        message.textContent = 'Error checking user: ' + error.message;
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
     }
@@ -95,28 +147,26 @@ function forgetUser() {
 
 // Forget password
 function forgetPassword() {
-    const mobile = document.getElementById('mobile').value;
+    const email = document.getElementById('email').value;
     const message = document.getElementById('forget-password-message');
-    const foundUser = users.find(u => u.mobile === mobile);
     message.classList.remove('hidden');
-    if (foundUser) {
-        const newPassword = prompt('Enter new password:');
-        if (newPassword) {
-            foundUser.password = newPassword;
-            localStorage.setItem('users', JSON.stringify(users));
-            message.textContent = 'Password reset successfully. Please log in.';
-            message.classList.remove('text-red-500');
-            message.classList.add('text-green-500');
-        } else {
-            message.textContent = 'Password reset cancelled.';
-            message.classList.remove('text-green-500');
-            message.classList.add('text-red-500');
-        }
-    } else {
-        message.textContent = 'No user found with this mobile number.';
+    if (!email) {
+        message.textContent = 'Please enter your email.';
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
+        return;
     }
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            message.textContent = 'Password reset email sent. Check your inbox.';
+            message.classList.remove('text-red-500');
+            message.classList.add('text-green-500');
+        })
+        .catch(error => {
+            message.textContent = 'Error: ' + error.message;
+            message.classList.remove('text-green-500');
+            message.classList.add('text-red-500');
+        });
 }
 
 // Contact form handling
@@ -164,13 +214,13 @@ function updateUserStatus() {
 
 // Logout function
 function logout() {
-    user = null;
-    localStorage.removeItem('user');
-    localStorage.removeItem('cart');
-    cart = [];
-    updateUserStatus();
-    updateCart();
-    window.location.href = 'login.html';
+    signOut(auth).then(() => {
+        user = null;
+        cart = [];
+        updateUserStatus();
+        updateCart();
+        window.location.href = 'login.html';
+    });
 }
 
 // Display products with image error handling
@@ -220,7 +270,7 @@ function displayFeaturedProducts(products) {
 }
 
 // Add to cart (restricted to logged-in users)
-function addToCart(productId) {
+async function addToCart(productId) {
     if (!user) {
         alert('Please log in to add items to the cart.');
         window.location.href = 'login.html';
@@ -229,13 +279,13 @@ function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     if (product) {
         cart.push(product);
-        localStorage.setItem('cart', JSON.stringify(cart));
+        await setDoc(doc(db, 'carts', user.uid), { items: cart });
         updateCart();
     }
 }
 
 // Update cart
-function updateCart() {
+async function updateCart() {
     const cartCount = document.getElementById('cart-count');
     const cartItems = document.getElementById('cart-items');
     const cartTotal = document.getElementById('cart-total');
