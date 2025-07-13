@@ -21,28 +21,102 @@ loadProducts();
 // Cart
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-// Login state
+// Users and login state
+let users = JSON.parse(localStorage.getItem('users')) || [];
 let user = JSON.parse(localStorage.getItem('user')) || null;
 updateUserStatus();
+
+// Signup form handling
+const signupForm = document.getElementById('signup-form');
+if (signupForm) {
+    signupForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const mobile = document.getElementById('mobile').value;
+        const location = document.getElementById('location').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('signup-error');
+        const successMessage = document.getElementById('signup-success');
+
+        if (users.find(u => u.mobile === mobile || u.email === email)) {
+            errorMessage.classList.remove('hidden');
+            errorMessage.textContent = 'Mobile number or email already exists.';
+            successMessage.classList.add('hidden');
+            return;
+        }
+
+        users.push({ name, email, mobile, location, password });
+        localStorage.setItem('users', JSON.stringify(users));
+        successMessage.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+        signupForm.reset();
+    });
+}
 
 // Login form handling
 const loginForm = document.getElementById('login-form');
 if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const username = document.getElementById('username').value;
+        const mobile = document.getElementById('mobile').value;
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('login-error');
-        if (username === 'user' && password === 'pass123') {
-            user = { username };
+
+        const foundUser = users.find(u => u.mobile === mobile && u.password === password);
+        if (foundUser) {
+            user = foundUser;
             localStorage.setItem('user', JSON.stringify(user));
             updateUserStatus();
             window.location.href = 'index.html';
         } else {
             errorMessage.classList.remove('hidden');
-            errorMessage.textContent = 'Invalid username or password.';
+            errorMessage.textContent = 'Invalid mobile number or password.';
         }
     });
+}
+
+// Forget user
+function forgetUser() {
+    const mobile = document.getElementById('mobile').value;
+    const message = document.getElementById('forget-user-message');
+    const foundUser = users.find(u => u.mobile === mobile);
+    message.classList.remove('hidden');
+    if (foundUser) {
+        message.textContent = `User found: ${foundUser.name}, Email: ${foundUser.email}`;
+        message.classList.remove('text-red-500');
+        message.classList.add('text-green-500');
+    } else {
+        message.textContent = 'No user found with this mobile number.';
+        message.classList.remove('text-green-500');
+        message.classList.add('text-red-500');
+    }
+}
+
+// Forget password
+function forgetPassword() {
+    const mobile = document.getElementById('mobile').value;
+    const message = document.getElementById('forget-password-message');
+    const foundUser = users.find(u => u.mobile === mobile);
+    message.classList.remove('hidden');
+    if (foundUser) {
+        const newPassword = prompt('Enter new password:');
+        if (newPassword) {
+            foundUser.password = newPassword;
+            localStorage.setItem('users', JSON.stringify(users));
+            message.textContent = 'Password reset successfully. Please log in.';
+            message.classList.remove('text-red-500');
+            message.classList.add('text-green-500');
+        } else {
+            message.textContent = 'Password reset cancelled.';
+            message.classList.remove('text-green-500');
+            message.classList.add('text-red-500');
+        }
+    } else {
+        message.textContent = 'No user found with this mobile number.';
+        message.classList.remove('text-green-500');
+        message.classList.add('text-red-500');
+    }
 }
 
 // Contact form handling
@@ -79,7 +153,7 @@ function updateUserStatus() {
     const loginLinks = document.querySelectorAll('#login-link');
     userStatusElements.forEach(el => {
         if (user) {
-            el.innerHTML = `Welcome, ${user.username} | <a href="#" onclick="logout()">Logout</a>`;
+            el.innerHTML = `Welcome, ${user.name} | <a href="#" onclick="logout()">Logout</a>`;
             loginLinks.forEach(link => link.classList.add('hidden'));
         } else {
             el.innerHTML = '';

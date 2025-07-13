@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samal Mobile - Login</title>
+    <title>Samal Mobile - Sign Up</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -24,21 +24,18 @@
         </div>
     </nav>
     <section class="container mx-auto py-8">
-        <h2 class="text-3xl font-bold text-center mb-8">Login</h2>
-        <form id="login-form" class="max-w-md mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-8">Sign Up</h2>
+        <form id="signup-form" class="max-w-md mx-auto">
+            <input type="text" id="name" placeholder="Name" class="w-full p-2 mb-4 border rounded" required>
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 mb-4 border rounded" required>
             <input type="text" id="mobile" placeholder="Mobile Number" class="w-full p-2 mb-4 border rounded" required>
+            <input type="text" id="location" placeholder="Location" class="w-full p-2 mb-4 border rounded" required>
             <input type="password" id="password" placeholder="Password" class="w-full p-2 mb-4 border rounded" required>
-            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">Login</button>
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">Sign Up</button>
         </form>
-        <div class="text-center mt-4">
-            <button onclick="forgetUser()" class="text-blue-600 underline">Forget User</button>
-            <span class="mx-2">|</span>
-            <button onclick="forgetPassword()" class="text-blue-600 underline">Forget Password</button>
-            <p class="mt-2">Don't have an account? <a href="signup.html" class="text-blue-600 underline">Sign Up</a></p>
-        </div>
-        <p id="login-error" class="text-red-500 text-center mt-4 hidden">Invalid mobile number or password.</p>
-        <p id="forget-user-message" class="text-center mt-4 hidden"></p>
-        <p id="forget-password-message" class="text-center mt-4 hidden"></p>
+        <p id="signup-error" class="text-red-500 text-center mt-4 hidden"></p>
+        <p id="signup-success" class="text-green-500 text-center mt-4 hidden">Account created! Please log in.</p>
+        <p class="text-center mt-4">Already have an account? <a href="login.html" class="text-blue-600 underline">Login</a></p>
     </section>
     <script src="script.js"></script>
 </body>
