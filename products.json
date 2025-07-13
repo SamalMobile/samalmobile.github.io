@@ -1,0 +1,65 @@
+[
+    {
+        "id": 1,
+        "name": "iPhone 14 (128GB)",
+        "price": 54999,
+        "image": "https://via.placeholder.com/150",
+        "category": "Smartphone"
+    },
+    {
+        "id": 2,
+        "name": "Samsung Galaxy S23 (128GB)",
+        "price": 64999,
+        "image": "https://via.placeholder.com/150",
+        "category": "Smartphone"
+    },
+    {
+        "id": 3,
+        "name": "Google Pixel 8 (128GB)",
+        "price": 75999,
+        "image": "https://via.placeholder.com/150",
+        "category": "Smartphone"
+    },
+    {
+        "id": 4,
+        "name": "boAt BassHeads Wired Earphones",
+        "price": 999,
+        "image": "https://via.placeholder.com/150",
+        "category": "Earphone"
+    },
+    {
+        "id": 5,
+        "name": "SanDisk 64GB MicroSD Card",
+        "price": 899,
+        "image": "https://via.placeholder.com/150",
+        "category": "Memory Card"
+    },
+    {
+        "id": 6,
+        "name": "Amazon Basics 30W USB-C Charger",
+        "price": 1999,
+        "image": "https://via.placeholder.com/150",
+        "category": "Charger"
+    },
+    {
+        "id": 7,
+        "name": "Amazon Basics USB-C Cable (1m)",
+        "price": 499,
+        "image": "https://via.placeholder.com/150",
+        "category": "Data Cable"
+    },
+    {
+        "id": 8,
+        "name": "Apple AirPods Pro",
+        "price": 18990,
+        "image": "https://via.placeholder.com/150",
+        "category": "Earphone"
+    },
+    {
+        "id": 9,
+        "name": "Spigen iPhone 14 Case",
+        "price": 1499,
+        "image": "https://via.placeholder.com/150",
+        "category": "Case"
+    }
+]

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samal Mobile - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between">
+            <h1 class="text-2xl font-bold">Samal Mobile</h1>
+            <div>
+                <a href="index.html" class="px-4">Home</a>
+                <a href="products.html" class="px-4">Products</a>
+                <a href="contact.html" class="px-4">Contact</a>
+                <a href="about.html" class="px-4">About Us</a>
+                <a href="#cart" class="px-4">Cart (<span id="cart-count">0</span>)</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-blue-500 text-white text-center py-16">
+        <h2 class="text-4xl font-bold">Welcome to Samal Mobile</h2>
+        <p class="mt-4 text-lg">Shop the latest smartphones and accessories at unbeatable prices!</p>
+        <a href="products.html" class="mt-6 inline-block bg-yellow-400 text-black py-2 px-4 rounded">Shop Now</a>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="container mx-auto py-8">
+        <h2 class="text-3xl font-bold text-center mb-8">Featured Products</h2>
+        <div id="featured-products" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

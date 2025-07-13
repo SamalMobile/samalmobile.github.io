@@ -1,0 +1,9 @@
+body {
+    font-family: 'Arial', sans-serif;
+}
+.product-card {
+    transition: transform 0.3s;
+}
+.product-card:hover {
+    transform: scale(1.05);
+}
