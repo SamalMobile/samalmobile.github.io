@@ -21,6 +21,55 @@ loadProducts();
 // Cart
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+// Login state
+let user = JSON.parse(localStorage.getItem('user')) || null;
+updateUserStatus();
+
+// Login form handling
+const loginForm = document.getElementById('login-form');
+if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('login-error');
+
+        // Demo credentials (replace with your logic or Firebase for real auth)
+        if (username === 'user' && password === 'pass123') {
+            user = { username };
+            localStorage.setItem('user', JSON.stringify(user));
+            updateUserStatus();
+            window.location.href = 'index.html';
+        } else {
+            errorMessage.classList.remove('hidden');
+            errorMessage.textContent = 'Invalid username or password.';
+        }
+    });
+}
+
+// Update user status in navbar
+function updateUserStatus() {
+    const userStatusElements = document.querySelectorAll('#user-status');
+    const loginLinks = document.querySelectorAll('#login-link');
+    userStatusElements.forEach(el => {
+        if (user) {
+            el.innerHTML = `Welcome, ${user.username} | <a href="#" onclick="logout()">Logout</a>`;
+            loginLinks.forEach(link => link.classList.add('hidden'));
+        } else {
+            el.innerHTML = '';
+            loginLinks.forEach(link => link.classList.remove('hidden'));
+        }
+    });
+}
+
+// Logout function
+function logout() {
+    user = null;
+    localStorage.removeItem('user');
+    updateUserStatus();
+    window.location.href = 'login.html';
+}
+
 // Display products
 function displayProducts(products) {
     const productList = document.getElementById('product-list');
