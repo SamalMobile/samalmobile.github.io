@@ -33,8 +33,6 @@ if (loginForm) {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('login-error');
-
-        // Demo credentials
         if (username === 'user' && password === 'pass123') {
             user = { username };
             localStorage.setItem('user', JSON.stringify(user));
@@ -54,14 +52,11 @@ if (contactForm) {
         e.preventDefault();
         const formError = document.getElementById('form-error');
         const formSuccess = document.getElementById('form-success');
-
         try {
             const response = await fetch('https://formspree.io/f/xeozjkqj', {
                 method: 'POST',
                 body: new FormData(contactForm),
-                headers: {
-                    'Accept': 'application/json'
-                }
+                headers: { 'Accept': 'application/json' }
             });
             if (response.ok) {
                 formSuccess.classList.remove('hidden');
@@ -97,14 +92,14 @@ function updateUserStatus() {
 function logout() {
     user = null;
     localStorage.removeItem('user');
-    localStorage.removeItem('cart'); // Clear cart on logout
+    localStorage.removeItem('cart');
     cart = [];
     updateUserStatus();
     updateCart();
     window.location.href = 'login.html';
 }
 
-// Display products
+// Display products with image error handling
 function displayProducts(products) {
     const productList = document.getElementById('product-list');
     if (productList) {
@@ -115,7 +110,7 @@ function displayProducts(products) {
             products.forEach(product => {
                 const card = `
                     <div class="product-card bg-white p-4 rounded shadow">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available';">
                         <h3 class="text-xl font-bold">${product.name}</h3>
                         <p class="text-gray-600">₹${product.price.toLocaleString('en-IN')}</p>
                         <button onclick="addToCart(${product.id})" class="bg-blue-600 text-white py-2 px-4 rounded mt-2">Add to Cart</button>
@@ -127,7 +122,7 @@ function displayProducts(products) {
     }
 }
 
-// Display featured products on home page
+// Display featured products with image error handling
 function displayFeaturedProducts(products) {
     const featuredList = document.getElementById('featured-products');
     if (featuredList) {
@@ -138,7 +133,7 @@ function displayFeaturedProducts(products) {
             products.forEach(product => {
                 const card = `
                     <div class="product-card bg-white p-4 rounded shadow">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available';">
                         <h3 class="text-xl font-bold">${product.name}</h3>
                         <p class="text-gray-600">₹${product.price.toLocaleString('en-IN')}</p>
                         <button onclick="addToCart(${product.id})" class="bg-blue-600 text-white py-2 px-4 rounded mt-2">Add to Cart</button>
