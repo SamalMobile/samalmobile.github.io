@@ -20,7 +20,6 @@
             </div>
         </div>
     </nav>
-
     <section class="container mx-auto py-8">
         <h2 class="text-3xl font-bold text-center mb-8">All Products</h2>
         <div class="mb-4">
@@ -36,14 +35,13 @@
             </select>
         </div>
         <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <p id="error-message" class="text-red-500 text-center hidden">Failed to load products. Please check back later.</p>
     </section>
-
     <section id="cart" class="container mx-auto py-8 hidden">
         <h2 class="text-3xl font-bold text-center mb-8">Your Cart</h2>
         <div id="cart-items"></div>
         <p id="cart-total" class="text-xl font-bold mt-4"></p>
     </section>
-
     <script src="script.js"></script>
 </body>
 </html>

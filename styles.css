@@ -7,3 +7,7 @@ body {
 .product-card:hover {
     transform: scale(1.05);
 }
+.fallback-message {
+    color: #ff0000;
+    text-align: center;
+}
