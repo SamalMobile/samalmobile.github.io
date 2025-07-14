@@ -46,7 +46,6 @@ let cart = [];
 let user = null;
 onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
-        // Check sessionStorage first
         const cachedUser = sessionStorage.getItem('user');
         if (cachedUser) {
             user = JSON.parse(cachedUser);
@@ -70,7 +69,7 @@ onAuthStateChanged(auth, async (firebaseUser) => {
     updateCart();
 });
 
-// Signup form handling
+// Signup form handling with 10-digit mobile validation
 const signupForm = document.getElementById('signup-form');
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
@@ -84,11 +83,20 @@ if (signupForm) {
         const successMessage = document.getElementById('signup-success');
         const loadingMessage = document.getElementById('signup-loading');
 
+        // Validate 10-digit mobile number
+        if (!/^\d{10}$/.test(mobile)) {
+            errorMessage.classList.remove('hidden');
+            errorMessage.textContent = 'Mobile number must be exactly 10 digits.';
+            successMessage.classList.add('hidden');
+            return;
+        }
+
         loadingMessage.classList.remove('hidden');
         errorMessage.classList.add('hidden');
         successMessage.classList.add('hidden');
 
         try {
+            // Check for existing mobile number
             const mobileQuery = query(collection(db, 'users'), where('mobile', '==', mobile));
             const mobileExists = await getDocs(mobileQuery);
             if (!mobileExists.empty) {
@@ -98,6 +106,7 @@ if (signupForm) {
                 return;
             }
 
+            // Create user and write to Firestore
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await setDoc(doc(db, 'users', userCredential.user.uid), {
                 name,
@@ -111,7 +120,7 @@ if (signupForm) {
             signupForm.reset();
         } catch (error) {
             errorMessage.classList.remove('hidden');
-            errorMessage.textContent = error.message;
+            errorMessage.textContent = error.message.includes('permission-denied') ? 'Signup failed due to server permissions. Please try again.' : error.message;
             successMessage.classList.add('hidden');
         } finally {
             loadingMessage.classList.add('hidden');
@@ -119,12 +128,12 @@ if (signupForm) {
     });
 }
 
-// Login form handling
+// Login form handling with mobile or email
 const loginForm = document.getElementById('login-form');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('email').value;
+        const input = document.getElementById('email-or-mobile').value;
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('login-error');
         const loadingMessage = document.getElementById('login-loading');
@@ -133,32 +142,49 @@ if (loginForm) {
         errorMessage.classList.add('hidden');
 
         try {
+            let email = input;
+            if (/^\d{10}$/.test(input)) {
+                const mobileQuery = query(collection(db, 'users'), where('mobile', '==', input));
+                const mobileDocs = await getDocs(mobileQuery);
+                if (mobileDocs.empty) {
+                    errorMessage.classList.remove('hidden');
+                    errorMessage.textContent = 'No account found with this mobile number.';
+                    loadingMessage.classList.add('hidden');
+                    return;
+                }
+                email = mobileDocs.docs[0].data().email;
+            }
             await signInWithEmailAndPassword(auth, email, password);
             window.location.href = 'index.html';
         } catch (error) {
             errorMessage.classList.remove('hidden');
-            errorMessage.textContent = 'Invalid email or password.';
+            errorMessage.textContent = 'Invalid email/mobile or password.';
         } finally {
             loadingMessage.classList.add('hidden');
         }
     });
 }
 
-// Forget user
+// Forget user with mobile or email
 async function forgetUser() {
-    const email = document.getElementById('email').value;
+    const input = document.getElementById('email-or-mobile').value;
     const message = document.getElementById('forget-user-message');
     message.classList.remove('hidden');
     try {
-        const userQuery = query(collection(db, 'users'), where('email', '==', email));
+        let userQuery;
+        if (/^\d{10}$/.test(input)) {
+            userQuery = query(collection(db, 'users'), where('mobile', '==', input));
+        } else {
+            userQuery = query(collection(db, 'users'), where('email', '==', input));
+        }
         const userDocs = await getDocs(userQuery);
         if (!userDocs.empty) {
             const userData = userDocs.docs[0].data();
-            message.textContent = `User found: ${userData.name}, Mobile: ${userData.mobile}`;
-            message.classList.remove('text-red-500');
+            message.textContent = `User found: ${userData.name}, Mobile: ${userData.mobile}, Email: ${userData.email}`;
+            message.classList.remove('text-green-500');
             message.classList.add('text-green-500');
         } else {
-            message.textContent = 'No user found with this email.';
+            message.textContent = 'No user found with this email or mobile number.';
             message.classList.remove('text-green-500');
             message.classList.add('text-red-500');
         }
@@ -169,28 +195,39 @@ async function forgetUser() {
     }
 }
 
-// Forget password
-function forgetPassword() {
-    const email = document.getElementById('email').value;
+// Forget password with mobile or email
+async function forgetPassword() {
+    const input = document.getElementById('email-or-mobile').value;
     const message = document.getElementById('forget-password-message');
     message.classList.remove('hidden');
-    if (!email) {
-        message.textContent = 'Please enter your email.';
+    if (!input) {
+        message.textContent = 'Please enter your email or mobile number.';
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
         return;
     }
-    sendPasswordResetEmail(auth, email)
-        .then(() => {
-            message.textContent = 'Password reset email sent. Check your inbox.';
-            message.classList.remove('text-red-500');
-            message.classList.add('text-green-500');
-        })
-        .catch(error => {
-            message.textContent = 'Error: ' + error.message;
-            message.classList.remove('text-green-500');
-            message.classList.add('text-red-500');
-        });
+    try {
+        let email = input;
+        if (/^\d{10}$/.test(input)) {
+            const mobileQuery = query(collection(db, 'users'), where('mobile', '==', input));
+            const mobileDocs = await getDocs(mobileQuery);
+            if (mobileDocs.empty) {
+                message.textContent = 'No account found with this mobile number.';
+                message.classList.remove('text-green-500');
+                message.classList.add('text-red-500');
+                return;
+            }
+            email = mobileDocs.docs[0].data().email;
+        }
+        await sendPasswordResetEmail(auth, email);
+        message.textContent = 'Password reset email sent. Check your inbox.';
+        message.classList.remove('text-red-500');
+        message.classList.add('text-green-500');
+    } catch (error) {
+        message.textContent = 'Error: ' + error.message;
+        message.classList.remove('text-green-500');
+        message.classList.add('text-red-500');
+    }
 }
 
 // Contact form handling
@@ -350,4 +387,32 @@ async function updateCart() {
     }
 }
 
-// Toggle
+// Toggle cart visibility
+document.querySelectorAll('a[href="#cart"]').forEach(link => {
+    link.addEventListener('click', () => {
+        if (!user) {
+            alert('Please log in to view the cart.');
+            window.location.href = 'login.html';
+            return;
+        }
+        const cartSection = document.getElementById('cart');
+        if (cartSection) {
+            cartSection.classList.toggle('hidden');
+            updateCart();
+        }
+    });
+});
+
+// Category filter
+const categoryFilter = document.getElementById('category-filter');
+if (categoryFilter) {
+    categoryFilter.addEventListener('change', (e) => {
+        const category = e.target.value;
+        if (category === 'all') {
+            displayProducts(products);
+        } else {
+            const filteredProducts = products.filter(p => p.category === category);
+            displayProducts(filteredProducts);
+        }
+    });
+}
