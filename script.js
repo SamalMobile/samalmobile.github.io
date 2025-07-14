@@ -69,7 +69,7 @@ onAuthStateChanged(auth, async (firebaseUser) => {
     updateCart();
 });
 
-// Signup form handling with 10-digit mobile validation
+// Signup form handling with 10-digit mobile validation and detailed error logging
 const signupForm = document.getElementById('signup-form');
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
@@ -97,9 +97,14 @@ if (signupForm) {
 
         try {
             // Check for existing mobile number
+            console.log('Checking mobile number uniqueness:', mobile);
             const mobileQuery = query(collection(db, 'users'), where('mobile', '==', mobile));
-            const mobileExists = await getDocs(mobileQuery);
+            const mobileExists = await getDocs(mobileQuery).catch(err => {
+                console.error('Mobile query failed:', err.message, err.code);
+                throw new Error('Failed to check mobile number. Ensure Firestore index for "mobile" exists.');
+            });
             if (!mobileExists.empty) {
+                console.log('Mobile number already exists:', mobile);
                 errorMessage.classList.remove('hidden');
                 errorMessage.textContent = 'Mobile number already exists.';
                 loadingMessage.classList.add('hidden');
@@ -107,20 +112,31 @@ if (signupForm) {
             }
 
             // Create user and write to Firestore
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            console.log('Creating user with email:', email);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password).catch(err => {
+                console.error('Auth user creation failed:', err.message, err.code);
+                throw err;
+            });
+            console.log('Writing user data to Firestore for UID:', userCredential.user.uid);
             await setDoc(doc(db, 'users', userCredential.user.uid), {
                 name,
                 email,
                 mobile,
                 location
+            }).catch(err => {
+                console.error('Firestore write failed:', err.message, err.code);
+                throw new Error('Failed to save user data. Check Firestore rules.');
             });
             sessionStorage.setItem('user', JSON.stringify({ name, email, mobile, location, uid: userCredential.user.uid }));
             successMessage.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             signupForm.reset();
         } catch (error) {
+            console.error('Signup error:', error.message, error.code);
             errorMessage.classList.remove('hidden');
-            errorMessage.textContent = error.message.includes('permission-denied') ? 'Signup failed due to server permissions. Please try again.' : error.message;
+            errorMessage.textContent = error.message.includes('permission-denied') 
+                ? 'Signup failed due to server permissions. Ensure Firestore rules allow writes to users/{uid} and the "mobile" index exists.' 
+                : error.message;
             successMessage.classList.add('hidden');
         } finally {
             loadingMessage.classList.add('hidden');
@@ -144,8 +160,12 @@ if (loginForm) {
         try {
             let email = input;
             if (/^\d{10}$/.test(input)) {
+                console.log('Querying Firestore for mobile:', input);
                 const mobileQuery = query(collection(db, 'users'), where('mobile', '==', input));
-                const mobileDocs = await getDocs(mobileQuery);
+                const mobileDocs = await getDocs(mobileQuery).catch(err => {
+                    console.error('Mobile query failed:', err.message, err.code);
+                    throw new Error('Failed to check mobile number. Ensure Firestore index for "mobile" exists.');
+                });
                 if (mobileDocs.empty) {
                     errorMessage.classList.remove('hidden');
                     errorMessage.textContent = 'No account found with this mobile number.';
@@ -153,10 +173,12 @@ if (loginForm) {
                     return;
                 }
                 email = mobileDocs.docs[0].data().email;
+                console.log('Found email for mobile:', email);
             }
             await signInWithEmailAndPassword(auth, email, password);
             window.location.href = 'index.html';
         } catch (error) {
+            console.error('Login error:', error.message, error.code);
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = 'Invalid email/mobile or password.';
         } finally {
@@ -177,11 +199,15 @@ async function forgetUser() {
         } else {
             userQuery = query(collection(db, 'users'), where('email', '==', input));
         }
-        const userDocs = await getDocs(userQuery);
+        console.log('Querying Firestore for forget user:', input);
+        const userDocs = await getDocs(userQuery).catch(err => {
+            console.error('Forget user query failed:', err.message, err.code);
+            throw new Error('Failed to check user. Ensure Firestore index for "mobile" or "email" exists.');
+        });
         if (!userDocs.empty) {
             const userData = userDocs.docs[0].data();
             message.textContent = `User found: ${userData.name}, Mobile: ${userData.mobile}, Email: ${userData.email}`;
-            message.classList.remove('text-green-500');
+            message.classList.remove('text-red-500');
             message.classList.add('text-green-500');
         } else {
             message.textContent = 'No user found with this email or mobile number.';
@@ -189,6 +215,7 @@ async function forgetUser() {
             message.classList.add('text-red-500');
         }
     } catch (error) {
+        console.error('Forget user error:', error.message, error.code);
         message.textContent = 'Error checking user: ' + error.message;
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
@@ -209,8 +236,12 @@ async function forgetPassword() {
     try {
         let email = input;
         if (/^\d{10}$/.test(input)) {
+            console.log('Querying Firestore for forget password mobile:', input);
             const mobileQuery = query(collection(db, 'users'), where('mobile', '==', input));
-            const mobileDocs = await getDocs(mobileQuery);
+            const mobileDocs = await getDocs(mobileQuery).catch(err => {
+                console.error('Forget password query failed:', err.message, err.code);
+                throw new Error('Failed to check mobile number. Ensure Firestore index for "mobile" exists.');
+            });
             if (mobileDocs.empty) {
                 message.textContent = 'No account found with this mobile number.';
                 message.classList.remove('text-green-500');
@@ -218,12 +249,14 @@ async function forgetPassword() {
                 return;
             }
             email = mobileDocs.docs[0].data().email;
+            console.log('Found email for forget password:', email);
         }
         await sendPasswordResetEmail(auth, email);
         message.textContent = 'Password reset email sent. Check your inbox.';
         message.classList.remove('text-red-500');
         message.classList.add('text-green-500');
     } catch (error) {
+        console.error('Forget password error:', error.message, error.code);
         message.textContent = 'Error: ' + error.message;
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
@@ -251,6 +284,7 @@ if (contactForm) {
                 throw new Error('Form submission failed');
             }
         } catch (error) {
+            console.error('Contact form error:', error.message);
             formError.classList.remove('hidden');
             formSuccess.classList.add('hidden');
             formError.textContent = 'Failed to submit form. Please try again.';
@@ -285,7 +319,7 @@ function logout() {
     });
 }
 
-// Display products with image error handling
+// Display products with image error handling and debug logging
 function displayProducts(products) {
     const productList = document.getElementById('product-list');
     if (productList) {
@@ -296,7 +330,7 @@ function displayProducts(products) {
             products.forEach(product => {
                 const card = `
                     <div class="product-card bg-white p-4 rounded shadow">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available';">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available'; console.error('Failed to load image for ${product.name}: ${product.image}');">
                         <h3 class="text-xl font-bold">${product.name}</h3>
                         <p class="text-gray-600">₹${product.price.toLocaleString('en-IN')}</p>
                         <button onclick="addToCart(${product.id})" class="bg-blue-600 text-white py-2 px-4 rounded mt-2">Add to Cart</button>
@@ -308,7 +342,7 @@ function displayProducts(products) {
     }
 }
 
-// Display featured products with image error handling
+// Display featured products with image error handling and debug logging
 function displayFeaturedProducts(products) {
     const featuredList = document.getElementById('featured-products');
     if (featuredList) {
@@ -319,7 +353,7 @@ function displayFeaturedProducts(products) {
             products.forEach(product => {
                 const card = `
                     <div class="product-card bg-white p-4 rounded shadow">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available';">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available'; console.error('Failed to load image for ${product.name}: ${product.image}');">
                         <h3 class="text-xl font-bold">${product.name}</h3>
                         <p class="text-gray-600">₹${product.price.toLocaleString('en-IN')}</p>
                         <button onclick="addToCart(${product.id})" class="bg-blue-600 text-white py-2 px-4 rounded mt-2">Add to Cart</button>
@@ -341,7 +375,9 @@ async function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     if (product) {
         cart.push(product);
-        await setDoc(doc(db, 'carts', user.uid), { items: cart });
+        await setDoc(doc(db, 'carts', user.uid), { items: cart }).catch(err => {
+            console.error('Cart write failed:', err.message, err.code);
+        });
         updateCart();
     }
 }
@@ -354,7 +390,9 @@ async function removeFromCart(index) {
         return;
     }
     cart.splice(index, 1);
-    await setDoc(doc(db, 'carts', user.uid), { items: cart });
+    await setDoc(doc(db, 'carts', user.uid), { items: cart }).catch(err => {
+        console.error('Cart write failed:', err.message, err.code);
+    });
     updateCart();
 }
 
