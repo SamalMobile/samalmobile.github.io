@@ -19,7 +19,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Load products with error handling
+// Load products
 let products = [];
 const loadProducts = async () => {
     try {
@@ -46,21 +46,37 @@ let cart = [];
 let user = null;
 onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
-        const cachedUser = sessionStorage.getItem('user');
-        if (cachedUser) {
-            user = JSON.parse(cachedUser);
-            const cartDoc = await getDoc(doc(db, 'carts', firebaseUser.uid));
-            cart = cartDoc.exists() ? cartDoc.data().items || [] : [];
-        } else {
-            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-            user = userDoc.exists() ? { ...userDoc.data(), uid: firebaseUser.uid } : null;
-            if (user) {
-                sessionStorage.setItem('user', JSON.stringify(user));
+        try {
+            const cachedUser = sessionStorage.getItem('user');
+            if (cachedUser) {
+                user = JSON.parse(cachedUser);
                 const cartDoc = await getDoc(doc(db, 'carts', firebaseUser.uid));
                 cart = cartDoc.exists() ? cartDoc.data().items || [] : [];
+            } else {
+                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                user = userDoc.exists() ? { ...userDoc.data(), uid: firebaseUser.uid } : null;
+                if (user) {
+                    sessionStorage.setItem('user', JSON.stringify(user));
+                    const cartDoc = await getDoc(doc(db, 'carts', firebaseUser.uid));
+                    cart = cartDoc.exists() ? cartDoc.data().items || [] : [];
+                } else {
+                    console.error('User data not found in Firestore for UID:', firebaseUser.uid);
+                    await signOut(auth); // Force logout if user data missing
+                    user = null;
+                    cart = [];
+                    sessionStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                }
             }
+            document.querySelectorAll('#cart-link').forEach(link => link.classList.remove('hidden'));
+        } catch (error) {
+            console.error('Error checking user state:', error.message, error.code);
+            user = null;
+            cart = [];
+            sessionStorage.removeItem('user');
+            document.querySelectorAll('#cart-link').forEach(link => link.classList.add('hidden'));
+            window.location.href = 'login.html';
         }
-        document.querySelectorAll('#cart-link').forEach(link => link.classList.remove('hidden'));
     } else {
         user = null;
         cart = [];
@@ -71,7 +87,7 @@ onAuthStateChanged(auth, async (firebaseUser) => {
     updateCart();
 });
 
-// Signup form handling with improved error management
+// Signup form handling
 const signupForm = document.getElementById('signup-form');
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
@@ -85,7 +101,7 @@ if (signupForm) {
         const successMessage = document.getElementById('signup-success');
         const loadingMessage = document.getElementById('signup-loading');
 
-        // Validate inputs
+        // Input validation
         if (!/^\d{10}$/.test(mobile)) {
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = 'Please enter a valid 10-digit mobile number.';
@@ -104,34 +120,53 @@ if (signupForm) {
         successMessage.classList.add('hidden');
 
         try {
-            // Check for existing mobile number
-            console.log('Checking mobile number uniqueness:', mobile);
+            // Check mobile number uniqueness
+            console.log('Checking mobile number:', mobile);
             const mobileQuery = query(collection(db, 'users'), where('mobile', '==', mobile));
             const mobileExists = await getDocs(mobileQuery).catch(err => {
                 console.error('Mobile query failed:', err.message, err.code);
                 throw new Error('Failed to check mobile number. Ensure Firestore index for "mobile" exists.');
             });
             if (!mobileExists.empty) {
-                console.log('Mobile number already exists:', mobile);
+                console.log('Mobile number exists:', mobile);
                 errorMessage.classList.remove('hidden');
                 errorMessage.textContent = 'This mobile number is already registered.';
                 loadingMessage.classList.add('hidden');
                 return;
             }
 
-            // Create user and write to Firestore
+            // Check email uniqueness
+            console.log('Checking email:', email);
+            const emailQuery = query(collection(db, 'users'), where('email', '==', email));
+            const emailExists = await getDocs(emailQuery).catch(err => {
+                console.error('Email query failed:', err.message, err.code);
+                throw new Error('Failed to check email. Ensure Firestore index for "email" exists.');
+            });
+            if (!emailExists.empty) {
+                console.log('Email exists:', email);
+                errorMessage.classList.remove('hidden');
+                errorMessage.textContent = 'This email is already registered. Try logging in.';
+                loadingMessage.classList.add('hidden');
+                return;
+            }
+
+            // Create user
             console.log('Creating user with email:', email);
             const userCredential = await createUserWithEmailAndPassword(auth, email, password).catch(err => {
-                console.error('Auth user creation failed:', err.message, err.code);
+                console.error('Auth error:', err.message, err.code);
                 if (err.code === 'auth/email-already-in-use') {
                     throw new Error('This email is already registered. Try logging in.');
                 } else if (err.code === 'auth/invalid-email') {
                     throw new Error('Please enter a valid email address.');
+                } else if (err.code === 'auth/weak-password') {
+                    throw new Error('Password is too weak. Use at least 6 characters.');
                 } else {
                     throw new Error('Signup failed. Please try again.');
                 }
             });
-            console.log('Writing user data to Firestore for UID:', userCredential.user.uid);
+
+            // Write to Firestore
+            console.log('Writing user data for UID:', userCredential.user.uid);
             await setDoc(doc(db, 'users', userCredential.user.uid), {
                 name,
                 email,
@@ -141,16 +176,17 @@ if (signupForm) {
                 console.error('Firestore write failed:', err.message, err.code);
                 throw new Error('Failed to save user data. Check Firestore rules.');
             });
+
             sessionStorage.setItem('user', JSON.stringify({ name, email, mobile, location, uid: userCredential.user.uid }));
             successMessage.classList.remove('hidden');
             successMessage.textContent = 'Signup successful! Redirecting...';
             errorMessage.classList.add('hidden');
-            setTimeout(() => window.location.href = 'index.html', 2000);
+            setTimeout(() => window.location.href = 'index.html', 1500);
         } catch (error) {
-            console.error('Signup error:', error.message, err.code);
+            console.error('Signup error:', error.message, error.code);
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = error.message.includes('permission-denied') 
-                ? 'Signup failed due to server permissions. Ensure Firestore rules allow writes to users/{uid} and the "mobile" index exists.' 
+                ? 'Signup failed due to server permissions. Contact support or check Firestore rules.' 
                 : error.message;
             successMessage.classList.add('hidden');
         } finally {
@@ -159,7 +195,7 @@ if (signupForm) {
     });
 }
 
-// Login form handling with improved error management
+// Login form handling
 const loginForm = document.getElementById('login-form');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -168,6 +204,12 @@ if (loginForm) {
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('login-error');
         const loadingMessage = document.getElementById('login-loading');
+
+        if (!input || !password) {
+            errorMessage.classList.remove('hidden');
+            errorMessage.textContent = 'Please enter both email/mobile and password.';
+            return;
+        }
 
         loadingMessage.classList.remove('hidden');
         errorMessage.classList.add('hidden');
@@ -190,21 +232,34 @@ if (loginForm) {
                 email = mobileDocs.docs[0].data().email;
                 console.log('Found email for mobile:', email);
             }
+
+            console.log('Attempting login with email:', email);
             await signInWithEmailAndPassword(auth, email, password).catch(err => {
                 console.error('Login failed:', err.message, err.code);
                 if (err.code === 'auth/wrong-password') {
-                    throw new Error('Incorrect password. Please try again or reset your password.');
+                    throw new Error('Incorrect password. Try again or reset your password.');
                 } else if (err.code === 'auth/user-not-found') {
                     throw new Error('No account found with this email.');
                 } else if (err.code === 'auth/invalid-email') {
                     throw new Error('Please enter a valid email or mobile number.');
+                } else if (err.code === 'auth/too-many-requests') {
+                    throw new Error('Too many login attempts. Please try again later.');
                 } else {
                     throw new Error('Login failed. Please try again.');
                 }
             });
+
+            // Verify user data exists in Firestore
+            const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+            if (!userDoc.exists()) {
+                console.error('User data not found in Firestore for UID:', auth.currentUser.uid);
+                await signOut(auth);
+                throw new Error('User data not found. Please sign up again.');
+            }
+
             window.location.href = 'index.html';
         } catch (error) {
-            console.error('Login error:', error.message, err.code);
+            console.error('Login error:', error.message, error.code);
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = error.message;
         } finally {
@@ -213,22 +268,29 @@ if (loginForm) {
     });
 }
 
-// Forget user with mobile or email
+// Forget user
 async function forgetUser() {
     const input = document.getElementById('email-or-mobile').value;
     const message = document.getElementById('forget-user-message');
     message.classList.remove('hidden');
+    if (!input) {
+        message.textContent = 'Please enter an email or mobile number.';
+        message.classList.remove('text-green-500');
+        message.classList.add('text-red-500');
+        return;
+    }
     try {
         let userQuery;
         if (/^\d{10}$/.test(input)) {
+            console.log('Querying Firestore for mobile:', input);
             userQuery = query(collection(db, 'users'), where('mobile', '==', input));
         } else {
+            console.log('Querying Firestore for email:', input);
             userQuery = query(collection(db, 'users'), where('email', '==', input));
         }
-        console.log('Querying Firestore for forget user:', input);
         const userDocs = await getDocs(userQuery).catch(err => {
             console.error('Forget user query failed:', err.message, err.code);
-            throw new Error('Failed to check user. Ensure Firestore index for "mobile" or "email" exists.');
+            throw new Error('Failed to check user. Ensure Firestore indexes for "mobile" and "email" exist.');
         });
         if (!userDocs.empty) {
             const userData = userDocs.docs[0].data();
@@ -241,20 +303,22 @@ async function forgetUser() {
             message.classList.add('text-red-500');
         }
     } catch (error) {
-        console.error('Forget user error:', error.message, err.code);
-        message.textContent = 'Error checking user: ' + error.message;
+        console.error('Forget user error:', error.message, error.code);
+        message.textContent = error.message.includes('permission-denied') 
+            ? 'Failed to check user due to server permissions. Contact support.' 
+            : 'Error: ' + error.message;
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
     }
 }
 
-// Forget password with mobile or email
+// Forget password
 async function forgetPassword() {
     const input = document.getElementById('email-or-mobile').value;
     const message = document.getElementById('forget-password-message');
     message.classList.remove('hidden');
     if (!input) {
-        message.textContent = 'Please enter your email or mobile number.';
+        message.textContent = 'Please enter an email or mobile number.';
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
         return;
@@ -262,7 +326,7 @@ async function forgetPassword() {
     try {
         let email = input;
         if (/^\d{10}$/.test(input)) {
-            console.log('Querying Firestore for forget password mobile:', input);
+            console.log('Querying Firestore for mobile:', input);
             const mobileQuery = query(collection(db, 'users'), where('mobile', '==', input));
             const mobileDocs = await getDocs(mobileQuery).catch(err => {
                 console.error('Forget password query failed:', err.message, err.code);
@@ -275,15 +339,29 @@ async function forgetPassword() {
                 return;
             }
             email = mobileDocs.docs[0].data().email;
-            console.log('Found email for forget password:', email);
+            console.log('Found email for mobile:', email);
         }
-        await sendPasswordResetEmail(auth, email);
+
+        console.log('Sending password reset email to:', email);
+        await sendPasswordResetEmail(auth, email).catch(err => {
+            console.error('Password reset failed:', err.message, err.code);
+            if (err.code === 'auth/invalid-email') {
+                throw new Error('Please enter a valid email address.');
+            } else if (err.code === 'auth/user-not-found') {
+                throw new Error('No account found with this email.');
+            } else {
+                throw new Error('Failed to send password reset email. Please try again.');
+            }
+        });
+
         message.textContent = 'Password reset email sent. Check your inbox.';
         message.classList.remove('text-red-500');
         message.classList.add('text-green-500');
     } catch (error) {
-        console.error('Forget password error:', error.message, err.code);
-        message.textContent = 'Error: ' + error.message;
+        console.error('Forget password error:', error.message, error.code);
+        message.textContent = error.message.includes('permission-denied') 
+            ? 'Failed to process request due to server permissions. Contact support.' 
+            : 'Error: ' + error.message;
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
     }
@@ -342,10 +420,13 @@ function logout() {
         updateUserStatus();
         updateCart();
         window.location.href = 'login.html';
+    }).catch(err => {
+        console.error('Logout failed:', err.message, err.code);
+        alert('Failed to log out. Please try again.');
     });
 }
 
-// Display products with image error handling
+// Display products
 function displayProducts(products) {
     const productList = document.getElementById('product-list');
     if (productList) {
@@ -368,7 +449,7 @@ function displayProducts(products) {
     }
 }
 
-// Display featured products with image error handling
+// Display featured products
 function displayFeaturedProducts(products) {
     const featuredList = document.getElementById('featured-products');
     if (featuredList) {
@@ -391,7 +472,7 @@ function displayFeaturedProducts(products) {
     }
 }
 
-// Add to cart (restricted to logged-in users)
+// Add to cart
 async function addToCart(productId) {
     if (!user) {
         alert('Please log in to add items to the cart.');
@@ -401,11 +482,13 @@ async function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     if (product) {
         cart.push(product);
-        await setDoc(doc(db, 'carts', user.uid), { items: cart }).catch(err => {
+        try {
+            await setDoc(doc(db, 'carts', user.uid), { items: cart });
+            updateCart();
+        } catch (err) {
             console.error('Cart write failed:', err.message, err.code);
             alert('Failed to update cart. Please try again.');
-        });
-        updateCart();
+        }
     }
 }
 
@@ -417,14 +500,16 @@ async function removeFromCart(index) {
         return;
     }
     cart.splice(index, 1);
-    await setDoc(doc(db, 'carts', user.uid), { items: cart }).catch(err => {
+    try {
+        await setDoc(doc(db, 'carts', user.uid), { items: cart });
+        updateCart();
+    } catch (err) {
         console.error('Cart write failed:', err.message, err.code);
         alert('Failed to update cart. Please try again.');
-    });
-    updateCart();
+    }
 }
 
-// Update cart (hidden for non-logged-in users)
+// Update cart
 async function updateCart() {
     const cartCount = document.getElementById('cart-count');
     const cartItems = document.getElementById('cart-items');
@@ -453,7 +538,7 @@ async function updateCart() {
     }
 }
 
-// Toggle cart visibility (restricted to logged-in users)
+// Toggle cart visibility
 document.querySelectorAll('a[href="#cart"]').forEach(link => {
     link.addEventListener('click', (e) => {
         if (!user) {
