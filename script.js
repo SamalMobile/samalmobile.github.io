@@ -33,7 +33,7 @@ const loadProducts = async () => {
         const errorMessages = document.querySelectorAll('#error-message');
         errorMessages.forEach(msg => {
             msg.classList.remove('hidden');
-            msg.textContent = 'Failed to load products. Please check back later.';
+            msg.textContent = 'Failed to load products. Please try again later.';
         });
     }
 };
@@ -60,16 +60,18 @@ onAuthStateChanged(auth, async (firebaseUser) => {
                 cart = cartDoc.exists() ? cartDoc.data().items || [] : [];
             }
         }
+        document.querySelectorAll('#cart-link').forEach(link => link.classList.remove('hidden'));
     } else {
         user = null;
         cart = [];
         sessionStorage.removeItem('user');
+        document.querySelectorAll('#cart-link').forEach(link => link.classList.add('hidden'));
     }
     updateUserStatus();
     updateCart();
 });
 
-// Signup form handling with 10-digit mobile validation and detailed error logging
+// Signup form handling with improved error management
 const signupForm = document.getElementById('signup-form');
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
@@ -83,10 +85,16 @@ if (signupForm) {
         const successMessage = document.getElementById('signup-success');
         const loadingMessage = document.getElementById('signup-loading');
 
-        // Validate 10-digit mobile number
+        // Validate inputs
         if (!/^\d{10}$/.test(mobile)) {
             errorMessage.classList.remove('hidden');
-            errorMessage.textContent = 'Mobile number must be exactly 10 digits.';
+            errorMessage.textContent = 'Please enter a valid 10-digit mobile number.';
+            successMessage.classList.add('hidden');
+            return;
+        }
+        if (password.length < 6) {
+            errorMessage.classList.remove('hidden');
+            errorMessage.textContent = 'Password must be at least 6 characters long.';
             successMessage.classList.add('hidden');
             return;
         }
@@ -106,7 +114,7 @@ if (signupForm) {
             if (!mobileExists.empty) {
                 console.log('Mobile number already exists:', mobile);
                 errorMessage.classList.remove('hidden');
-                errorMessage.textContent = 'Mobile number already exists.';
+                errorMessage.textContent = 'This mobile number is already registered.';
                 loadingMessage.classList.add('hidden');
                 return;
             }
@@ -115,7 +123,13 @@ if (signupForm) {
             console.log('Creating user with email:', email);
             const userCredential = await createUserWithEmailAndPassword(auth, email, password).catch(err => {
                 console.error('Auth user creation failed:', err.message, err.code);
-                throw err;
+                if (err.code === 'auth/email-already-in-use') {
+                    throw new Error('This email is already registered. Try logging in.');
+                } else if (err.code === 'auth/invalid-email') {
+                    throw new Error('Please enter a valid email address.');
+                } else {
+                    throw new Error('Signup failed. Please try again.');
+                }
             });
             console.log('Writing user data to Firestore for UID:', userCredential.user.uid);
             await setDoc(doc(db, 'users', userCredential.user.uid), {
@@ -129,10 +143,11 @@ if (signupForm) {
             });
             sessionStorage.setItem('user', JSON.stringify({ name, email, mobile, location, uid: userCredential.user.uid }));
             successMessage.classList.remove('hidden');
+            successMessage.textContent = 'Signup successful! Redirecting...';
             errorMessage.classList.add('hidden');
-            signupForm.reset();
+            setTimeout(() => window.location.href = 'index.html', 2000);
         } catch (error) {
-            console.error('Signup error:', error.message, error.code);
+            console.error('Signup error:', error.message, err.code);
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = error.message.includes('permission-denied') 
                 ? 'Signup failed due to server permissions. Ensure Firestore rules allow writes to users/{uid} and the "mobile" index exists.' 
@@ -144,7 +159,7 @@ if (signupForm) {
     });
 }
 
-// Login form handling with mobile or email
+// Login form handling with improved error management
 const loginForm = document.getElementById('login-form');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -175,12 +190,23 @@ if (loginForm) {
                 email = mobileDocs.docs[0].data().email;
                 console.log('Found email for mobile:', email);
             }
-            await signInWithEmailAndPassword(auth, email, password);
+            await signInWithEmailAndPassword(auth, email, password).catch(err => {
+                console.error('Login failed:', err.message, err.code);
+                if (err.code === 'auth/wrong-password') {
+                    throw new Error('Incorrect password. Please try again or reset your password.');
+                } else if (err.code === 'auth/user-not-found') {
+                    throw new Error('No account found with this email.');
+                } else if (err.code === 'auth/invalid-email') {
+                    throw new Error('Please enter a valid email or mobile number.');
+                } else {
+                    throw new Error('Login failed. Please try again.');
+                }
+            });
             window.location.href = 'index.html';
         } catch (error) {
-            console.error('Login error:', error.message, error.code);
+            console.error('Login error:', error.message, err.code);
             errorMessage.classList.remove('hidden');
-            errorMessage.textContent = 'Invalid email/mobile or password.';
+            errorMessage.textContent = error.message;
         } finally {
             loadingMessage.classList.add('hidden');
         }
@@ -215,7 +241,7 @@ async function forgetUser() {
             message.classList.add('text-red-500');
         }
     } catch (error) {
-        console.error('Forget user error:', error.message, error.code);
+        console.error('Forget user error:', error.message, err.code);
         message.textContent = 'Error checking user: ' + error.message;
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
@@ -256,7 +282,7 @@ async function forgetPassword() {
         message.classList.remove('text-red-500');
         message.classList.add('text-green-500');
     } catch (error) {
-        console.error('Forget password error:', error.message, error.code);
+        console.error('Forget password error:', error.message, err.code);
         message.textContent = 'Error: ' + error.message;
         message.classList.remove('text-green-500');
         message.classList.add('text-red-500');
@@ -319,7 +345,7 @@ function logout() {
     });
 }
 
-// Display products with image error handling and debug logging
+// Display products with image error handling
 function displayProducts(products) {
     const productList = document.getElementById('product-list');
     if (productList) {
@@ -342,7 +368,7 @@ function displayProducts(products) {
     }
 }
 
-// Display featured products with image error handling and debug logging
+// Display featured products with image error handling
 function displayFeaturedProducts(products) {
     const featuredList = document.getElementById('featured-products');
     if (featuredList) {
@@ -377,6 +403,7 @@ async function addToCart(productId) {
         cart.push(product);
         await setDoc(doc(db, 'carts', user.uid), { items: cart }).catch(err => {
             console.error('Cart write failed:', err.message, err.code);
+            alert('Failed to update cart. Please try again.');
         });
         updateCart();
     }
@@ -392,17 +419,18 @@ async function removeFromCart(index) {
     cart.splice(index, 1);
     await setDoc(doc(db, 'carts', user.uid), { items: cart }).catch(err => {
         console.error('Cart write failed:', err.message, err.code);
+        alert('Failed to update cart. Please try again.');
     });
     updateCart();
 }
 
-// Update cart
+// Update cart (hidden for non-logged-in users)
 async function updateCart() {
     const cartCount = document.getElementById('cart-count');
     const cartItems = document.getElementById('cart-items');
     const cartTotal = document.getElementById('cart-total');
-    if (cartCount) cartCount.textContent = cart.length;
-    if (cartItems) {
+    if (cartCount && user) cartCount.textContent = cart.length;
+    if (cartItems && user) {
         cartItems.innerHTML = '';
         let total = 0;
         if (cart.length === 0) {
@@ -425,10 +453,11 @@ async function updateCart() {
     }
 }
 
-// Toggle cart visibility
+// Toggle cart visibility (restricted to logged-in users)
 document.querySelectorAll('a[href="#cart"]').forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
         if (!user) {
+            e.preventDefault();
             alert('Please log in to view the cart.');
             window.location.href = 'login.html';
             return;

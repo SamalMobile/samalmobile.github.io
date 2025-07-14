@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samal Mobile - Login</title>
+    <title>Login - SamalMobile</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="script.js"></script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-blue-600 text-white p-4">
-        <div class="container mx-auto flex justify-between">
-            <h1 class="text-2xl font-bold">Samal Mobile</h1>
+    <header class="bg-blue-600 text-white p-4">
+        <nav class="container mx-auto flex justify-between">
             <div>
                 <a href="index.html" class="px-4">Home</a>
                 <a href="products.html" class="px-4">Products</a>
@@ -18,29 +17,33 @@
                 <a href="about.html" class="px-4">About Us</a>
                 <a href="login.html" class="px-4" id="login-link">Login</a>
                 <a href="signup.html" class="px-4">Sign Up</a>
-                <a href="#cart" class="px-4">Cart (<span id="cart-count">0</span>)</a>
+                <a href="#cart" class="px-4 hidden" id="cart-link">Cart (<span id="cart-count">0</span>)</a>
                 <span id="user-status" class="px-4"></span>
             </div>
-        </div>
-    </nav>
-    <section class="container mx-auto py-8">
-        <h2 class="text-3xl font-bold text-center mb-8">Login</h2>
-        <form id="login-form" class="max-w-md mx-auto">
-            <input type="email" id="email" placeholder="Email" class="w-full p-2 mb-4 border rounded" required>
-            <input type="password" id="password" placeholder="Password" class="w-full p-2 mb-4 border rounded" required>
-            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded">Login</button>
-            <p id="login-loading" class="text-center mt-4 hidden">Loading...</p>
+        </nav>
+    </header>
+    <main class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Login</h1>
+        <form id="login-form" class="max-w-md mx-auto bg-white p-6 rounded shadow">
+            <div class="mb-4">
+                <label for="email-or-mobile" class="block text-gray-700">Email or Mobile</label>
+                <input type="text" id="email-or-mobile" class="w-full p-2 border rounded" required autofocus>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700">Password</label>
+                <input type="password" id="password" class="w-full p-2 border rounded" required>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded w-full">Login</button>
+            <p class="mt-4 text-center">
+                <a href="#" onclick="forgetUser()" class="text-blue-600 underline">Forget User</a> | 
+                <a href="#" onclick="forgetPassword()" class="text-blue-600 underline">Forget Password</a> | 
+                <a href="signup.html" class="text-blue-600 underline">Sign Up</a>
+            </p>
+            <p id="login-error" class="text-red-500 hidden mt-4"></p>
+            <p id="login-loading" class="text-gray-500 hidden mt-4">Processing...</p>
+            <p id="forget-user-message" class="mt-4 hidden"></p>
+            <p id="forget-password-message" class="mt-4 hidden"></p>
         </form>
-        <div class="text-center mt-4">
-            <button onclick="forgetUser()" class="text-blue-600 underline">Forget User</button>
-            <span class="mx-2">|</span>
-            <button onclick="forgetPassword()" class="text-blue-600 underline">Forget Password</button>
-            <p class="mt-2">Don't have an account? <a href="signup.html" class="text-blue-600 underline">Sign Up</a></p>
-        </div>
-        <p id="login-error" class="text-red-500 text-center mt-4 hidden">Invalid email or password.</p>
-        <p id="forget-user-message" class="text-center mt-4 hidden"></p>
-        <p id="forget-password-message" class="text-center mt-4 hidden"></p>
-    </section>
-    <script type="module" src="script.js"></script>
+    </main>
 </body>
 </html>
