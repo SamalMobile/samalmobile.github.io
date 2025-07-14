@@ -46,15 +46,25 @@ let cart = [];
 let user = null;
 onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        user = userDoc.exists() ? { ...userDoc.data(), uid: firebaseUser.uid } : null;
-        if (user) {
+        // Check sessionStorage first
+        const cachedUser = sessionStorage.getItem('user');
+        if (cachedUser) {
+            user = JSON.parse(cachedUser);
             const cartDoc = await getDoc(doc(db, 'carts', firebaseUser.uid));
             cart = cartDoc.exists() ? cartDoc.data().items || [] : [];
+        } else {
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+            user = userDoc.exists() ? { ...userDoc.data(), uid: firebaseUser.uid } : null;
+            if (user) {
+                sessionStorage.setItem('user', JSON.stringify(user));
+                const cartDoc = await getDoc(doc(db, 'carts', firebaseUser.uid));
+                cart = cartDoc.exists() ? cartDoc.data().items || [] : [];
+            }
         }
     } else {
         user = null;
         cart = [];
+        sessionStorage.removeItem('user');
     }
     updateUserStatus();
     updateCart();
@@ -72,6 +82,11 @@ if (signupForm) {
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('signup-error');
         const successMessage = document.getElementById('signup-success');
+        const loadingMessage = document.getElementById('signup-loading');
+
+        loadingMessage.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+        successMessage.classList.add('hidden');
 
         try {
             const mobileQuery = query(collection(db, 'users'), where('mobile', '==', mobile));
@@ -79,7 +94,7 @@ if (signupForm) {
             if (!mobileExists.empty) {
                 errorMessage.classList.remove('hidden');
                 errorMessage.textContent = 'Mobile number already exists.';
-                successMessage.classList.add('hidden');
+                loadingMessage.classList.add('hidden');
                 return;
             }
 
@@ -90,6 +105,7 @@ if (signupForm) {
                 mobile,
                 location
             });
+            sessionStorage.setItem('user', JSON.stringify({ name, email, mobile, location, uid: userCredential.user.uid }));
             successMessage.classList.remove('hidden');
             errorMessage.classList.add('hidden');
             signupForm.reset();
@@ -97,6 +113,8 @@ if (signupForm) {
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = error.message;
             successMessage.classList.add('hidden');
+        } finally {
+            loadingMessage.classList.add('hidden');
         }
     });
 }
@@ -109,6 +127,10 @@ if (loginForm) {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const errorMessage = document.getElementById('login-error');
+        const loadingMessage = document.getElementById('login-loading');
+
+        loadingMessage.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
@@ -116,6 +138,8 @@ if (loginForm) {
         } catch (error) {
             errorMessage.classList.remove('hidden');
             errorMessage.textContent = 'Invalid email or password.';
+        } finally {
+            loadingMessage.classList.add('hidden');
         }
     });
 }
@@ -217,6 +241,7 @@ function logout() {
     signOut(auth).then(() => {
         user = null;
         cart = [];
+        sessionStorage.removeItem('user');
         updateUserStatus();
         updateCart();
         window.location.href = 'login.html';
@@ -284,6 +309,18 @@ async function addToCart(productId) {
     }
 }
 
+// Remove from cart
+async function removeFromCart(index) {
+    if (!user) {
+        alert('Please log in to modify the cart.');
+        window.location.href = 'login.html';
+        return;
+    }
+    cart.splice(index, 1);
+    await setDoc(doc(db, 'carts', user.uid), { items: cart });
+    updateCart();
+}
+
 // Update cart
 async function updateCart() {
     const cartCount = document.getElementById('cart-count');
@@ -296,11 +333,14 @@ async function updateCart() {
         if (cart.length === 0) {
             cartItems.innerHTML = '<p class="text-center">Your cart is empty.</p>';
         } else {
-            cart.forEach(item => {
+            cart.forEach((item, index) => {
                 cartItems.innerHTML += `
                     <div class="flex justify-between p-2 border-b">
                         <span>${item.name}</span>
-                        <span>₹${item.price.toLocaleString('en-IN')}</span>
+                        <div>
+                            <span>₹${item.price.toLocaleString('en-IN')}</span>
+                            <button onclick="removeFromCart(${index})" class="text-red-500 underline ml-4">Remove</button>
+                        </div>
                     </div>
                 `;
                 total += item.price;
@@ -310,32 +350,4 @@ async function updateCart() {
     }
 }
 
-// Toggle cart visibility
-document.querySelectorAll('a[href="#cart"]').forEach(link => {
-    link.addEventListener('click', () => {
-        if (!user) {
-            alert('Please log in to view the cart.');
-            window.location.href = 'login.html';
-            return;
-        }
-        const cartSection = document.getElementById('cart');
-        if (cartSection) {
-            cartSection.classList.toggle('hidden');
-            updateCart();
-        }
-    });
-});
-
-// Category filter
-const categoryFilter = document.getElementById('category-filter');
-if (categoryFilter) {
-    categoryFilter.addEventListener('change', (e) => {
-        const category = e.target.value;
-        if (category === 'all') {
-            displayProducts(products);
-        } else {
-            const filteredProducts = products.filter(p => p.category === category);
-            displayProducts(filteredProducts);
-        }
-    });
-}
+// Toggle
