@@ -4,49 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SamalMobile - Contact</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <script type="module" src="script.js"></script>
 </head>
-<body class="bg-gray-100 font-sans">
-    <header class="bg-blue-600 text-white sticky top-0 z-50 shadow-lg">
+<body class="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text transition-colors duration-300">
+    <header class="bg-primary text-white sticky top-0 z-50 shadow-lg">
         <nav class="container mx-auto p-4 flex justify-between items-center">
             <div class="text-2xl font-bold">SamalMobile</div>
-            <div class="space-x-6">
-                <a href="index.html" class="hover:text-yellow-400 transition duration-300">Home</a>
-                <a href="products.html" class="hover:text-yellow-400 transition duration-300">Products</a>
-                <a href="contact.html" class="hover:text-yellow-400 transition duration-300">Contact</a>
-                <a href="about.html" class="hover:text-yellow-400 transition duration-300">About</a>
+            <div class="flex items-center space-x-6">
+                <a href="index.html" class="hover:text-accent transition duration-300">Home</a>
+                <a href="products.html" class="hover:text-accent transition duration-300">Products</a>
+                <a href="contact.html" class="hover:text-accent transition duration-300">Contact</a>
+                <a href="about.html" class="hover:text-accent transition duration-300">About</a>
+                <button id="theme-toggle" class="focus:outline-none">
+                    <svg class="w-6 h-6 fill-current" id="theme-icon" viewBox="0 0 24 24">
+                        <path id="sun-icon" d="M12 16a4 4 0 100-8 4 4 0 000 8zm0 2a6 6 0 110-12 6 6 0 010 12zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                        <path id="moon-icon" class="hidden" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                </button>
             </div>
         </nav>
     </header>
     <main class="container mx-auto p-4">
         <h1 class="text-3xl font-bold mb-6 text-center animate-slide-up">Contact Us</h1>
-        <form id="contact-form" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg animate-fade-in">
+        <form id="contact-form" class="max-w-md mx-auto bg-card-bg p-6 rounded-lg shadow-lg animate-fade-in">
             <div class="mb-4">
-                <label for="name" class="block text-gray-700 font-semibold">Name</label>
-                <input type="text" id="name" name="name" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-600" required>
+                <label for="name" class="block font-semibold">Name</label>
+                <input type="text" id="name" name="name" class="w-full p-2 border rounded-lg bg-card-bg focus:ring-2 focus:ring-primary" required>
             </div>
             <div class="mb-4">
-                <label for="email" class="block text-gray-700 font-semibold">Email</label>
-                <input type="email" id="email" name="email" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-600" required>
+                <label for="email" class="block font-semibold">Email</label>
+                <input type="email" id="email" name="email" class="w-full p-2 border rounded-lg bg-card-bg focus:ring-2 focus:ring-primary" required>
             </div>
             <div class="mb-4">
-                <label for="message" class="block text-gray-700 font-semibold">Message</label>
-                <textarea id="message" name="message" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-600" required></textarea>
+                <label for="message" class="block font-semibold">Message</label>
+                <textarea id="message" name="message" class="w-full p-2 border rounded-lg bg-card-bg focus:ring-2 focus:ring-primary" required></textarea>
             </div>
-            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-lg w-full hover:bg-blue-700 transition duration-300">Send Message</button>
+            <button type="submit" class="bg-accent text-primary py-2 px-4 rounded-lg w-full hover:bg-yellow-500 transition duration-300">Send Message</button>
             <p id="form-error" class="text-red-500 hidden mt-4 text-center"></p>
             <p id="form-success" class="text-green-500 hidden mt-4 text-center">Message sent successfully!</p>
         </form>
+        <h2 class="text-2xl font-bold mt-12 mb-6 text-center animate-slide-up">Leave Your Feedback</h2>
+        <form id="feedback-form" class="max-w-md mx-auto bg-card-bg p-6 rounded-lg shadow-lg animate-fade-in">
+            <div class="mb-4">
+                <label for="feedback-name" class="block font-semibold">Name</label>
+                <input type="text" id="feedback-name" name="name" class="w-full p-2 border rounded-lg bg-card-bg focus:ring-2 focus:ring-primary" required>
+            </div>
+            <div class="mb-4">
+                <label for="rating" class="block font-semibold">Rating</label>
+                <div class="star-rating" id="rating">
+                    <input type="radio" id="star5" name="rating" value="5" required><label for="star5">★</label>
+                    <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+                    <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+                    <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+                    <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="feedback" class="block font-semibold">Feedback</label>
+                <textarea id="feedback" name="feedback" class="w-full p-2 border rounded-lg bg-card-bg focus:ring-2 focus:ring-primary" required></textarea>
+            </div>
+            <button type="submit" class="bg-accent text-primary py-2 px-4 rounded-lg w-full hover:bg-yellow-500 transition duration-300">Submit Feedback</button>
+            <p id="feedback-error" class="text-red-500 hidden mt-4 text-center"></p>
+            <p id="feedback-success" class="text-green-500 hidden mt-4 text-center">Feedback submitted successfully!</p>
+        </form>
     </main>
-    <footer class="bg-blue-600 text-white p-4 text-center mt-8">
-        <p>&copy; 2025 SamalMobile. All rights reserved.</p>
+    <footer class="bg-primary text-white p-4 text-center mt-8">
+        <p>© 2025 SamalMobile. All rights reserved.</p>
     </footer>
-    <style>
-        .animate-fade-in { animation: fadeIn 1s ease-in; }
-        .animate-slide-up { animation: slideUp 1s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
 </body>
 </html>

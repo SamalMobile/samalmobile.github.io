@@ -1,3 +1,34 @@
+// Theme Toggle
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+const sunIcon = document.getElementById('sun-icon');
+const moonIcon = document.getElementById('moon-icon');
+
+if (themeToggle) {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+    } else {
+        document.documentElement.classList.remove('dark');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+    }
+
+    themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        if (document.documentElement.classList.contains('dark')) {
+            localStorage.setItem('theme', 'dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        } else {
+            localStorage.setItem('theme', 'light');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+    });
+}
+
 // Load products
 let products = [];
 const loadProducts = async () => {
@@ -46,20 +77,50 @@ if (contactForm) {
     });
 }
 
+// Feedback form handling
+const feedbackForm = document.getElementById('feedback-form');
+if (feedbackForm) {
+    feedbackForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const feedbackError = document.getElementById('feedback-error');
+        const feedbackSuccess = document.getElementById('feedback-success');
+        try {
+            const response = await fetch('https://formspree.io/f/xeozjkqj', {
+                method: 'POST',
+                body: new FormData(feedbackForm),
+                headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+                feedbackSuccess.classList.remove('hidden');
+                feedbackError.classList.add('hidden');
+                feedbackForm.reset();
+            } else {
+                throw new Error(`HTTP ${response.status}: Feedback submission failed`);
+            }
+        } catch (error) {
+            console.error('Feedback form error:', error.message);
+            feedbackError.classList.remove('hidden');
+            feedbackSuccess.classList.add('hidden');
+            feedbackError.textContent = 'Failed to submit feedback. Please try again.';
+        }
+    });
+}
+
 // Display products
 function displayProducts(products) {
     const productList = document.getElementById('product-list');
     if (productList) {
         productList.innerHTML = '';
         if (products.length === 0) {
-            productList.innerHTML = '<p class="text-center text-gray-700">No products available in this category.</p>';
+            productList.innerHTML = '<p class="text-center">No products available in this category.</p>';
         } else {
+            productList.classList.add('grid', 'grid-cols-1', 'sm:grid-cols-2', 'md:grid-cols-3');
             products.forEach(product => {
                 const card = `
-                    <div class="product-card bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available'; console.error('Failed to load image for ${product.name}: ${product.image}');">
-                        <h3 class="text-xl font-bold text-gray-800">${product.name}</h3>
-                        <p class="text-gray-600">₹${product.price.toLocaleString('en-IN')}</p>
+                    <div class="product-card">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available'; console.error('Failed to load image for ${product.name}: ${product.image}');">
+                        <h3 class="text-xl font-bold">${product.name}</h3>
+                        <p>₹${product.price.toLocaleString('en-IN')}</p>
                     </div>
                 `;
                 productList.innerHTML += card;
@@ -74,14 +135,15 @@ function displayFeaturedProducts(products) {
     if (featuredList) {
         featuredList.innerHTML = '';
         if (products.length === 0) {
-            featuredList.innerHTML = '<p class="text-center text-gray-700">No featured products available.</p>';
+            featuredList.innerHTML = '<p class="text-center">No featured products available.</p>';
         } else {
+            featuredList.classList.add('grid', 'grid-cols-1', 'sm:grid-cols-2', 'md:grid-cols-3');
             products.forEach(product => {
                 const card = `
-                    <div class="product-card bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available'; console.error('Failed to load image for ${product.name}: ${product.image}');">
-                        <h3 class="text-xl font-bold text-gray-800">${product.name}</h3>
-                        <p class="text-gray-600">₹${product.price.toLocaleString('en-IN')}</p>
+                    <div class="product-card">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/150'; this.alt='Image not available'; console.error('Failed to load image for ${product.name}: ${product.image}');">
+                        <h3 class="text-xl font-bold">${product.name}</h3>
+                        <p>₹${product.price.toLocaleString('en-IN')}</p>
                     </div>
                 `;
                 featuredList.innerHTML += card;
