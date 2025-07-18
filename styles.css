@@ -1,141 +1,158 @@
-/* Add to styles.css */
-
-/* Contact and Feedback Form */
-.contact-form, .feedback-form {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 1.5rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+:root {
+    --primary: #3399ff;
+    --primary-dark: #264d73;
+    --primary-light: #b3e0ff;
+    --text: #222;
+    --bg: #fff;
+    --bg-dark: #131313;
+    --text-dark: #eee;
 }
 
-body[data-theme="dark"] .contact-form,
-body[data-theme="dark"] .feedback-form {
-    background-color: #2a2a2a;
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.contact-form h3, .feedback-form h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: #e84393;
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
 }
 
-body[data-theme="dark"] .contact-form h3,
-body[data-theme="dark"] .feedback-form h3 {
-    color: #00d2d3;
+body[data-theme="dark"] {
+    background: var(--bg-dark);
+    color: var(--text-dark);
 }
 
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    color: #e84393;
-}
-
-body[data-theme="dark"] .form-group label {
-    color: #00d2d3;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ff6b6b;
-    border-radius: 5px;
-    font-size: 1rem;
-    background-color: #f9f9f9;
-    color: #333;
-}
-
-body[data-theme="dark"] .form-group input,
-body[data-theme="dark"] .form-group textarea {
-    background-color: #333;
-    color: #e0e0e0;
-    border: 1px solid #00d2d3;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #00d2d3;
-    box-shadow: 0 0 5px rgba(0, 210, 211, 0.3);
-}
-
-.submit-btn {
-    background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+header {
+    background: var(--primary);
     color: #fff;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.submit-btn:hover {
-    background: linear-gradient(90deg, #e84393, #ff6b6b);
-}
-
-body[data-theme="dark"] .submit-btn {
-    background: linear-gradient(90deg, #00d2d3, #1a1a1a);
-}
-
-body[data-theme="dark"] .submit-btn:hover {
-    background: linear-gradient(90deg, #00d2d3, #ff6b6b);
-}
-
-/* Star Rating */
-.rating {
+    padding: 20px 0;
     display: flex;
-    flex-direction: row-reverse;
-    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.rating input {
-    display: none;
+header h1 {
+    margin-left: 24px;
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 1px;
 }
 
-.rating label {
+.theme-toggle {
+    background: none;
+    border: none;
+    color: #fff;
     font-size: 1.5rem;
-    color: #ccc;
     cursor: pointer;
-    transition: color 0.3s;
+    margin-right: 24px;
 }
 
-.rating input:checked ~ label,
-.rating label:hover,
-.rating label:hover ~ label {
-    color: #ff6b6b;
+nav {
+    background: var(--primary-light);
+    padding: 10px 0;
 }
 
-body[data-theme="dark"] .rating label {
-    color: #555;
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 36px;
 }
 
-body[data-theme="dark"] .rating input:checked ~ label,
-body[data-theme="dark"] .rating label:hover,
-body[data-theme="dark"] .rating label:hover ~ label {
-    color: #00d2d3;
+nav a {
+    text-decoration: none;
+    color: var(--primary-dark);
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: color 0.2s;
 }
 
-/* Responsive Design (extends existing media query) */
-@media (max-width: 768px) {
-    .contact-form, .feedback-form {
-        padding: 1rem;
+nav a[aria-current="page"],
+nav a:hover {
+    color: var(--primary);
+}
+
+.container {
+    padding: 40px 20px;
+    max-width: 800px;
+    margin: 2rem auto;
+    background: rgba(51,153,255,0.05);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(51,153,255,0.10);
+    text-align: center;
+}
+
+h2 {
+    color: var(--primary-dark);
+    margin-bottom: 16px;
+    font-size: 2rem;
+}
+
+.btn {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    padding: 12px 32px;
+    margin-top: 24px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.15rem;
+    transition: background 0.2s;
+}
+
+.btn:hover {
+    background: var(--primary-dark);
+}
+
+footer {
+    text-align: center;
+    padding: 18px 0;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    margin-top: 40px;
+}
+
+body[data-theme="dark"] header,
+body[data-theme="dark"] nav,
+body[data-theme="dark"] footer {
+    background: var(--primary-dark);
+    color: var(--text-dark);
+}
+
+body[data-theme="dark"] nav a,
+body[data-theme="dark"] footer {
+    color: var(--primary-light);
+}
+
+body[data-theme="dark"] .btn {
+    background: #111c28;
+    color: #fff;
+}
+
+body[data-theme="dark"] .container {
+    background: rgba(41,61,81,0.4);
+    box-shadow: 0 2px 16px rgba(10,25,50,0.19);
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        margin-left: 12px;
+        font-size: 1.3rem;
     }
-
-    .form-group input,
-    .form-group textarea {
-        font-size: 0.9rem;
+    .theme-toggle {
+        margin-right: 12px;
     }
-
-    .submit-btn {
-        width: 100%;
-        padding: 0.75rem;
+    nav ul {
+        gap: 16px;
+    }
+    .container {
+        padding: 18px 6px;
     }
 }
