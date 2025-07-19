@@ -1,282 +1,150 @@
-// Load your product data
-const products = [
-    {"brand": "Samsung", "model": "Galaxy F05", "price": 7999, "back_cover": "Silicone Soft Case", "back_cover_price": 299, "front_glass": "Tempered Glass 9H", "front_glass_price": 199},
-    {"brand": "Samsung", "model": "Galaxy M05", "price": 7999, "back_cover": "Silicone Soft Case", "back_cover_price": 299, "front_glass": "Tempered Glass 9H", "front_glass_price": 199},
-    // ... rest of your product data
-];
+// Mobile Navigation Toggle
+const hamburger = document.querySelector('.hamburger');
+const navMenu = document.querySelector('.nav-menu');
 
-// Global filter state
-let currentFilters = {
-    brand: 'all',
-    minPrice: 0,
-    maxPrice: 200000,
-    sort: 'default'
-};
-
-let filteredProducts = [...products];
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-    setupEventListeners();
-    initializePriceRange();
-    renderProducts(products);
-    updateResultsCount();
-});
-
-// Set up all event listeners[1][2][3]
-function setupEventListeners() {
-    // Brand filter buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', handleBrandFilter);
+if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
     });
-
-    // Price range slider
-    const priceRange = document.getElementById('priceRange');
-    const currentMaxPrice = document.getElementById('currentMaxPrice');
     
-    priceRange.addEventListener('input', (e) => {
-        currentMaxPrice.textContent = `₹${parseInt(e.target.value).toLocaleString()}`;
-    });
-
-    // Apply price filter button
-    document.querySelector('.apply-filter-btn').addEventListener('click', applyPriceFilter);
-
-    // Sort select
-    document.getElementById('sortSelect').addEventListener('change', handleSort);
-
-    // Clear filters button
-    document.querySelector('.clear-filters-btn').addEventListener('click', clearAllFilters);
-
-    // Price input fields
-    document.getElementById('minPrice').addEventListener('change', handlePriceInputs);
-    document.getElementById('maxPrice').addEventListener('change', handlePriceInputs);
-
-    // Mobile menu toggle
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
-    
-    if (hamburger && navMenu) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
+    // Close menu when clicking on links
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
         });
-    }
-}
-
-// Initialize price range based on product data[6][12]
-function initializePriceRange() {
-    const prices = products.map(p => p.price);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    
-    const priceRange = document.getElementById('priceRange');
-    const minPriceInput = document.getElementById('minPrice');
-    const maxPriceInput = document.getElementById('maxPrice');
-    
-    priceRange.min = minPrice;
-    priceRange.max = maxPrice;
-    priceRange.value = maxPrice;
-    
-    minPriceInput.placeholder = minPrice.toString();
-    maxPriceInput.placeholder = maxPrice.toString();
-    
-    currentFilters.minPrice = minPrice;
-    currentFilters.maxPrice = maxPrice;
-    
-    document.getElementById('currentMaxPrice').textContent = `₹${maxPrice.toLocaleString()}`;
-}
-
-// Handle brand filtering[2][5]
-function handleBrandFilter(e) {
-    // Remove active class from all buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Add active class to clicked button
-    e.target.classList.add('active');
-    
-    // Update filter state
-    currentFilters.brand = e.target.dataset.brand;
-    
-    // Apply all filters
-    applyAllFilters();
-}
-
-// Handle price filter application[6][12]
-function applyPriceFilter() {
-    const minPrice = parseInt(document.getElementById('minPrice').value) || 0;
-    const maxPrice = parseInt(document.getElementById('maxPrice').value) || parseInt(document.getElementById('priceRange').value);
-    
-    currentFilters.minPrice = minPrice;
-    currentFilters.maxPrice = maxPrice;
-    
-    applyAllFilters();
-}
-
-// Handle price input changes
-function handlePriceInputs() {
-    const minPrice = parseInt(document.getElementById('minPrice').value) || 0;
-    const maxPrice = parseInt(document.getElementById('maxPrice').value) || 200000;
-    
-    // Update slider position
-    document.getElementById('priceRange').value = maxPrice;
-    document.getElementById('currentMaxPrice').textContent = `₹${maxPrice.toLocaleString()}`;
-}
-
-// Handle sorting[1][8]
-function handleSort(e) {
-    currentFilters.sort = e.target.value;
-    applyAllFilters();
-}
-
-// Apply all filters and sorting[9][10]
-function applyAllFilters() {
-    let filtered = [...products];
-    
-    // Apply brand filter
-    if (currentFilters.brand !== 'all') {
-        filtered = filtered.filter(product => product.brand === currentFilters.brand);
-    }
-    
-    // Apply price filter
-    filtered = filtered.filter(product => 
-        product.price >= currentFilters.minPrice && 
-        product.price <= currentFilters.maxPrice
-    );
-    
-    // Apply sorting
-    switch (currentFilters.sort) {
-        case 'price-low':
-            filtered.sort((a, b) => a.price - b.price);
-            break;
-        case 'price-high':
-            filtered.sort((a, b) => b.price - a.price);
-            break;
-        case 'name-az':
-            filtered.sort((a, b) => a.model.localeCompare(b.model));
-            break;
-        case 'name-za':
-            filtered.sort((a, b) => b.model.localeCompare(a.model));
-            break;
-        default:
-            // Keep original order
-            break;
-    }
-    
-    filteredProducts = filtered;
-    renderProducts(filtered);
-    updateResultsCount();
-}
-
-// Render products to the grid
-function renderProducts(productsToRender) {
-    const productGrid = document.getElementById('productGrid');
-    productGrid.innerHTML = '';
-    
-    if (productsToRender.length === 0) {
-        productGrid.innerHTML = `
-            <div class="no-products">
-                <h3>No products found</h3>
-                <p>Try adjusting your filters to see more products.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    productsToRender.forEach(product => {
-        const productCard = createProductCard(product);
-        productGrid.appendChild(productCard);
     });
 }
 
-// Create individual product card
-function createProductCard(product) {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    
-    card.innerHTML = `
-        <div class="product-header">
-            <div class="product-brand">${product.brand}</div>
-            <div class="product-price">₹${product.price.toLocaleString()}</div>
-        </div>
-        
-        <h3 class="product-title">${product.model}</h3>
-        
-        <div class="accessories-info">
-            <h4>Available Accessories:</h4>
-            <div class="accessory-item">
-                <span>${product.back_cover}</span>
-                <span class="accessory-price">₹${product.back_cover_price}</span>
-            </div>
-            <div class="accessory-item">
-                <span>${product.front_glass}</span>
-                <span class="accessory-price">₹${product.front_glass_price}</span>
-            </div>
-        </div>
-        
-        <button class="add-to-cart" onclick="addToCart('${product.model}')">
-            Add to Cart
-        </button>
-    `;
-    
-    return card;
+// Contact Form Handling
+const contactForm = document.getElementById('contactForm');
+
+if (contactForm) {
+    contactForm.addEventListener('submit', handleFormSubmit);
 }
 
-// Update results count
-function updateResultsCount() {
-    document.getElementById('resultsCount').textContent = filteredProducts.length;
-}
-
-// Clear all filters[5]
-function clearAllFilters() {
-    // Reset filter state
-    currentFilters = {
-        brand: 'all',
-        minPrice: 0,
-        maxPrice: 200000,
-        sort: 'default'
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.querySelector('.submit-btn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    submitBtn.disabled = true;
+    
+    // Get form data
+    const formData = new FormData(contactForm);
+    const data = {
+        name: formData.get('name'),
+        phone: formData.get('phone'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message'),
+        updates: formData.get('updates') ? true : false
     };
     
-    // Reset UI elements
-    document.querySelector('.filter-btn[data-brand="all"]').classList.add('active');
-    document.querySelectorAll('.filter-btn:not([data-brand="all"])').forEach(btn => {
-        btn.classList.remove('active');
+    try {
+        // Simulate form submission (replace with your actual endpoint)
+        await simulateFormSubmission(data);
+        
+        // Success feedback
+        showNotification('Message sent successfully! We\'ll get back to you soon.', 'success');
+        contactForm.reset();
+        
+        // Send WhatsApp message option
+        const whatsappMessage = `Hi Samal Mobile,\n\nName: ${data.name}\nPhone: ${data.phone}\nSubject: ${data.subject}\nMessage: ${data.message}`;
+        const whatsappUrl = `https://wa.me/919938008008?text=${encodeURIComponent(whatsappMessage)}`;
+        
+        setTimeout(() => {
+            if (confirm('Would you like to also send this message via WhatsApp for faster response?')) {
+                window.open(whatsappUrl, '_blank');
+            }
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Form submission error:', error);
+        showNotification('Failed to send message. Please try calling us directly.', 'error');
+    } finally {
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// Simulate form submission (replace with actual API call)
+function simulateFormSubmission(data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            // Here you would make an actual API call to your backend
+            // For now, we'll just resolve after 2 seconds
+            console.log('Form data:', data);
+            resolve();
+        }, 2000);
     });
-    
-    document.getElementById('minPrice').value = '';
-    document.getElementById('maxPrice').value = '';
-    document.getElementById('priceRange').value = 200000;
-    document.getElementById('currentMaxPrice').textContent = '₹200,000';
-    document.getElementById('sortSelect').value = 'default';
-    
-    // Re-render all products
-    renderProducts(products);
-    filteredProducts = [...products];
-    updateResultsCount();
 }
 
-// Add to cart functionality
-function addToCart(productModel) {
-    const button = event.target;
-    const originalText = button.textContent;
+// Notification system
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+        ${message}
+    `;
     
-    // Visual feedback
-    button.textContent = 'Added! ✓';
-    button.style.background = '#10b981';
-    button.disabled = true;
+    // Add notification styles
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+    `;
     
+    document.body.appendChild(notification);
+    
+    // Animate in
     setTimeout(() => {
-        button.textContent = originalText;
-        button.style.background = '';
-        button.disabled = false;
-    }, 2000);
+        notification.style.transform = 'translateX(0)';
+    }, 100);
     
-    // Add your cart logic here
-    console.log(`Added ${productModel} to cart`);
+    // Remove after 5 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(400px)';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 5000);
 }
 
-// Smooth scrolling for navigation
+// Phone number formatting for Indian numbers
+const phoneInput = document.getElementById('phone');
+if (phoneInput) {
+    phoneInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        // Limit to 10 digits
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        
+        e.target.value = value;
+    });
+}
+
+// Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -287,5 +155,39 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 block: 'start'
             });
         }
+    });
+});
+
+// Add animation on scroll
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+// Observe elements for animation
+document.querySelectorAll('.info-card, .service-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+});
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Samal Mobile Contact Page Loaded');
+    
+    // Set current year in footer if needed
+    const currentYear = new Date().getFullYear();
+    document.querySelectorAll('.footer-bottom p').forEach(p => {
+        p.innerHTML = p.innerHTML.replace('2025', currentYear);
     });
 });
