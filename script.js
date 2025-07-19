@@ -140,7 +140,6 @@ class ThemeManager {
     }
 
     initTheme() {
-        // Check for saved theme or default to light mode
         const savedTheme = localStorage.getItem('samal-mobile-theme') || 'light';
         this.setTheme(savedTheme);
     }
@@ -160,7 +159,6 @@ class ThemeManager {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('samal-mobile-theme', theme);
         
-        // Update toggle button icon
         const toggleIcon = document.querySelector('#theme-toggle i');
         if (toggleIcon) {
             toggleIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
@@ -168,47 +166,73 @@ class ThemeManager {
     }
 }
 
-// Mobile Navigation Management
-class MobileNavManager {
+// Enhanced Mobile Navigation Management
+class EnhancedMobileNavManager {
     constructor() {
         this.setupMobileNav();
+        this.handleResize();
     }
 
     setupMobileNav() {
         const hamburger = document.querySelector('.hamburger');
         const navMenu = document.querySelector('.nav-menu');
+        const themeToggle = document.querySelector('.theme-toggle-container');
         
         if (hamburger && navMenu) {
             hamburger.addEventListener('click', () => {
                 hamburger.classList.toggle('active');
                 navMenu.classList.toggle('active');
                 
-                // Prevent body scroll when menu is open
                 if (navMenu.classList.contains('active')) {
                     document.body.style.overflow = 'hidden';
+                    if (themeToggle && window.innerWidth <= 768) {
+                        themeToggle.style.right = '15px';
+                    }
                 } else {
                     document.body.style.overflow = 'auto';
+                    if (themeToggle && window.innerWidth <= 768) {
+                        themeToggle.style.right = '70px';
+                    }
                 }
             });
             
-            // Close menu when clicking on links
             document.querySelectorAll('.nav-menu a').forEach(link => {
                 link.addEventListener('click', () => {
                     hamburger.classList.remove('active');
                     navMenu.classList.remove('active');
                     document.body.style.overflow = 'auto';
+                    
+                    if (themeToggle && window.innerWidth <= 768) {
+                        themeToggle.style.right = '70px';
+                    }
                 });
             });
 
-            // Close menu when clicking outside
             document.addEventListener('click', (e) => {
-                if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
+                if (!hamburger.contains(e.target) && !navMenu.contains(e.target) && !themeToggle.contains(e.target)) {
                     hamburger.classList.remove('active');
                     navMenu.classList.remove('active');
                     document.body.style.overflow = 'auto';
+                    
+                    if (themeToggle && window.innerWidth <= 768) {
+                        themeToggle.style.right = '70px';
+                    }
                 }
             });
         }
+    }
+
+    handleResize() {
+        window.addEventListener('resize', () => {
+            const themeToggle = document.querySelector('.theme-toggle-container');
+            if (themeToggle) {
+                if (window.innerWidth > 768) {
+                    themeToggle.style.right = '20px';
+                } else {
+                    themeToggle.style.right = '70px';
+                }
+            }
+        });
     }
 }
 
@@ -232,11 +256,9 @@ class ContactFormManager {
         const submitBtn = document.querySelector('.submit-btn');
         const originalText = submitBtn.innerHTML;
         
-        // Show loading state
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         submitBtn.disabled = true;
         
-        // Get form data
         const formData = new FormData(e.target);
         const data = {
             name: formData.get('name'),
@@ -248,14 +270,11 @@ class ContactFormManager {
         };
         
         try {
-            // Simulate form submission
             await this.simulateFormSubmission(data);
             
-            // Success feedback
             this.showNotification('Message sent successfully! We\'ll get back to you soon.', 'success');
             e.target.reset();
             
-            // WhatsApp option
             setTimeout(() => {
                 if (confirm('Would you like to also send this message via WhatsApp for faster response?')) {
                     const whatsappMessage = this.formatWhatsAppMessage(data);
@@ -354,12 +373,10 @@ Please get back to me at your earliest convenience.`;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Samal Mobile Website Loading...');
     
-    // Initialize all managers
     new ThemeManager();
-    new MobileNavManager();
+    new EnhancedMobileNavManager();
     new ContactFormManager();
     
-    // Initialize existing functionality
     setupEventListeners();
     initializePriceRange();
     renderProducts(products);
@@ -370,12 +387,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Set up all event listeners
 function setupEventListeners() {
-    // Brand filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', handleBrandFilter);
     });
 
-    // Price range slider
     const priceRange = document.getElementById('priceRange');
     const currentMaxPrice = document.getElementById('currentMaxPrice');
     
@@ -385,25 +400,21 @@ function setupEventListeners() {
         });
     }
 
-    // Apply price filter button
     const applyFilterBtn = document.querySelector('.apply-filter-btn');
     if (applyFilterBtn) {
         applyFilterBtn.addEventListener('click', applyPriceFilter);
     }
 
-    // Sort select
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
         sortSelect.addEventListener('change', handleSort);
     }
 
-    // Clear filters button
     const clearFiltersBtn = document.querySelector('.clear-filters-btn');
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', clearAllFilters);
     }
 
-    // Price input fields
     const minPriceInput = document.getElementById('minPrice');
     const maxPriceInput = document.getElementById('maxPrice');
     
@@ -415,7 +426,6 @@ function setupEventListeners() {
     }
 }
 
-// Initialize price range based on product data
 function initializePriceRange() {
     const prices = products.map(p => p.price);
     const minPrice = Math.min(...prices);
@@ -447,7 +457,6 @@ function initializePriceRange() {
     }
 }
 
-// Handle brand filtering
 function handleBrandFilter(e) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     e.target.classList.add('active');
@@ -455,7 +464,6 @@ function handleBrandFilter(e) {
     applyAllFilters();
 }
 
-// Handle price filter application
 function applyPriceFilter() {
     const minPriceInput = document.getElementById('minPrice');
     const maxPriceInput = document.getElementById('maxPrice');
@@ -470,7 +478,6 @@ function applyPriceFilter() {
     applyAllFilters();
 }
 
-// Handle price input changes
 function handlePriceInputs() {
     const minPriceInput = document.getElementById('minPrice');
     const maxPriceInput = document.getElementById('maxPrice');
@@ -484,13 +491,11 @@ function handlePriceInputs() {
     if (currentMaxPrice) currentMaxPrice.textContent = `₹${maxPrice.toLocaleString()}`;
 }
 
-// Handle sorting
 function handleSort(e) {
     currentFilters.sort = e.target.value;
     applyAllFilters();
 }
 
-// Apply all filters and sorting
 function applyAllFilters() {
     let filtered = [...products];
     
@@ -523,7 +528,6 @@ function applyAllFilters() {
     updateResultsCount();
 }
 
-// Render products to the grid
 function renderProducts(productsToRender) {
     const productGrid = document.getElementById('productGrid');
     if (!productGrid) return;
@@ -547,7 +551,6 @@ function renderProducts(productsToRender) {
     });
 }
 
-// Create individual product card
 function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -580,7 +583,6 @@ function createProductCard(product) {
     return card;
 }
 
-// Update results count
 function updateResultsCount() {
     const resultsCount = document.getElementById('resultsCount');
     if (resultsCount) {
@@ -588,7 +590,6 @@ function updateResultsCount() {
     }
 }
 
-// Clear all filters
 function clearAllFilters() {
     const prices = products.map(p => p.price);
     const maxPrice = Math.max(...prices);
@@ -624,7 +625,6 @@ function clearAllFilters() {
     updateResultsCount();
 }
 
-// Add to cart functionality
 function addToCart(productModel, productBrand, productPrice) {
     const button = event.target;
     const originalText = button.textContent;
@@ -649,7 +649,6 @@ function addToCart(productModel, productBrand, productPrice) {
     }, 1000);
 }
 
-// Smooth scrolling
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -663,7 +662,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Scroll to products function
 function scrollToProducts() {
     const productsSection = document.getElementById('products');
     if (productsSection) {
@@ -674,7 +672,6 @@ function scrollToProducts() {
     }
 }
 
-// Header scroll effect
 window.addEventListener('scroll', () => {
     const header = document.querySelector('.header');
     if (header) {
