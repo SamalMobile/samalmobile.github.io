@@ -134,10 +134,12 @@ let filteredProducts = [...products];
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Samal Mobile Website Loading...');
     setupEventListeners();
     initializePriceRange();
     renderProducts(products);
     updateResultsCount();
+    console.log('Samal Mobile Website Loaded Successfully!');
 });
 
 // Set up all event listeners
@@ -505,5 +507,3 @@ window.addEventListener('scroll', () => {
         }
     }
 });
-
-console.log('Samal Mobile Website Loaded Successfully!');

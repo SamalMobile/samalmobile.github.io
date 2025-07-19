@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact - Samal Mobile | Mobile & Accessories Store in Rimuli, Keonjhar</title>
-    <meta name="description" content="Contact Samal Mobile in Rimuli, Keonjhar, Odisha. Get in touch for mobile phones, accessories, repairs and services. Call +91-9938008008">
+    <title>Samal Mobile - Mobile & Accessories Store | Rimuli, Keonjhar</title>
+    <meta name="description" content="Samal Mobile - Your trusted mobile and accessories store in Rimuli, Keonjhar, Odisha. Latest smartphones, cases, chargers, and repair services.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -18,10 +20,10 @@
                     <span class="location">Rimuli, Keonjhar</span>
                 </div>
                 <ul class="nav-menu">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
+                    <li><a href="index.html" class="active">Home</a></li>
                     <li><a href="products.html">Products</a></li>
-                    <li><a href="contact.html" class="active">Contact</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
                 </ul>
                 <div class="contact-cta">
                     <a href="tel:+919938008008" class="phone-btn">
@@ -38,188 +40,116 @@
         </nav>
     </header>
 
-    <main class="contact-main">
-        <!-- Hero Section -->
-        <section class="contact-hero">
-            <div class="container">
-                <div class="hero-content">
-                    <h1>Get in Touch with Samal Mobile</h1>
-                    <p>Your trusted mobile and accessories store in Rimuli, Keonjhar, Odisha</p>
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Premium Mobile Devices & Accessories</h1>
+                <p>Your trusted mobile store in Rimuli, Keonjhar, Odisha</p>
+                <div class="hero-buttons">
+                    <button class="cta-button" onclick="scrollToProducts()">Shop Now</button>
+                    <a href="tel:+919938008008" class="cta-button-outline">
+                        <i class="fas fa-phone"></i> Call Us
+                    </a>
                 </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-phone"></div>
             </div>
         </section>
 
-        <!-- Contact Information Section -->
-        <section class="contact-info-section">
-            <div class="container">
-                <div class="contact-info-grid">
-                    <!-- Store Details -->
-                    <div class="info-card">
-                        <div class="icon">
-                            <i class="fas fa-store"></i>
-                        </div>
-                        <h3>Visit Our Store</h3>
-                        <p><strong>Samal Mobile</strong></p>
-                        <p>Rimuli, Keonjhar District</p>
-                        <p>Odisha, India</p>
-                    </div>
-
-                    <!-- Phone -->
-                    <div class="info-card">
-                        <div class="icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <h3>Call Us</h3>
-                        <p>For immediate assistance</p>
-                        <a href="tel:+919938008008" class="contact-link">
-                            +91-9938008008
-                        </a>
-                    </div>
-
-                    <!-- WhatsApp -->
-                    <div class="info-card">
-                        <div class="icon">
-                            <i class="fab fa-whatsapp"></i>
-                        </div>
-                        <h3>WhatsApp</h3>
-                        <p>Quick chat and support</p>
-                        <a href="https://wa.me/919938008008" class="contact-link" target="_blank">
-                            Message on WhatsApp
-                        </a>
-                    </div>
-
-                    <!-- Business Hours -->
-                    <div class="info-card">
-                        <div class="icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <h3>Business Hours</h3>
-                        <p><strong>Monday - Saturday:</strong> 9:00 AM - 8:00 PM</p>
-                        <p><strong>Sunday:</strong> 10:00 AM - 6:00 PM</p>
+        <!-- Filter Section -->
+        <section class="filters-section" id="brands">
+            <div class="filters-container">
+                <h2>Filter Products</h2>
+                
+                <!-- Brand Filter -->
+                <div class="filter-group">
+                    <h3>Brand</h3>
+                    <div class="brand-filters">
+                        <button class="filter-btn active" data-brand="all">All Brands</button>
+                        <button class="filter-btn" data-brand="Samsung">Samsung</button>
+                        <button class="filter-btn" data-brand="Vivo">Vivo</button>
+                        <button class="filter-btn" data-brand="Realme">Realme</button>
+                        <button class="filter-btn" data-brand="OnePlus">OnePlus</button>
+                        <button class="filter-btn" data-brand="OPPO">OPPO</button>
+                        <button class="filter-btn" data-brand="Apple">Apple</button>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Contact Form Section -->
-        <section class="contact-form-section">
-            <div class="container">
-                <div class="form-container">
-                    <div class="form-header">
-                        <h2>Send Us a Message</h2>
-                        <p>Have questions about our products or services? We'd love to hear from you!</p>
-                    </div>
-
-                    <form class="contact-form" id="contactForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">
-                                    <i class="fas fa-user"></i>
-                                    Full Name *
-                                </label>
-                                <input type="text" id="name" name="name" required>
+                <!-- Price Range Filter -->
+                <div class="filter-group">
+                    <h3>Price Range</h3>
+                    <div class="price-filter">
+                        <div class="price-inputs">
+                            <div class="price-input-group">
+                                <label for="minPrice">Min Price (₹)</label>
+                                <input type="number" id="minPrice" placeholder="0" min="0">
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="phone">
-                                    <i class="fas fa-mobile-alt"></i>
-                                    Phone Number *
-                                </label>
-                                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+                            <div class="price-input-group">
+                                <label for="maxPrice">Max Price (₹)</label>
+                                <input type="number" id="maxPrice" placeholder="200000" min="0">
                             </div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="email">
-                                <i class="fas fa-envelope"></i>
-                                Email Address
-                            </label>
-                            <input type="email" id="email" name="email">
+                        <div class="price-range-slider">
+                            <input type="range" id="priceRange" min="0" max="200000" value="200000" step="1000">
+                            <div class="price-display">
+                                <span>₹0</span>
+                                <span id="currentMaxPrice">₹200,000</span>
+                            </div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="subject">
-                                <i class="fas fa-tag"></i>
-                                Subject *
-                            </label>
-                            <select id="subject" name="subject" required>
-                                <option value="">Choose a topic</option>
-                                <option value="product_inquiry">Product Inquiry</option>
-                                <option value="price_check">Price Check</option>
-                                <option value="repair_service">Repair Service</option>
-                                <option value="accessories">Accessories</option>
-                                <option value="warranty">Warranty Support</option>
-                                <option value="feedback">Feedback</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="message">
-                                <i class="fas fa-comment-alt"></i>
-                                Your Message *
-                            </label>
-                            <textarea id="message" name="message" rows="5" 
-                                placeholder="Tell us how we can help you..." required></textarea>
-                        </div>
-
-                        <div class="form-group checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="updates" name="updates">
-                                <span class="checkmark"></span>
-                                I would like to receive updates about new products and offers
-                            </label>
-                        </div>
-
-                        <button type="submit" class="submit-btn">
-                            <i class="fas fa-paper-plane"></i>
-                            Send Message
-                        </button>
-                    </form>
+                        <button class="apply-filter-btn">Apply Price Filter</button>
+                    </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="quick-actions">
-                    <h3>Need Immediate Help?</h3>
-                    <div class="action-buttons">
-                        <a href="tel:+919938008008" class="action-btn call-btn">
-                            <i class="fas fa-phone"></i>
-                            Call Now
-                        </a>
-                        <a href="https://wa.me/919938008008?text=Hi,%20I%20need%20help%20with" 
-                           class="action-btn whatsapp-btn" target="_blank">
-                            <i class="fab fa-whatsapp"></i>
-                            WhatsApp
-                        </a>
+                <!-- Sort Options -->
+                <div class="filter-group">
+                    <h3>Sort By</h3>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="default">Default</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="name-az">Name: A to Z</option>
+                        <option value="name-za">Name: Z to A</option>
+                    </select>
+                </div>
+
+                <!-- Clear Filters -->
+                <div class="filter-actions">
+                    <button class="clear-filters-btn">Clear All Filters</button>
+                    <div class="results-count">
+                        Showing <span id="resultsCount">0</span> products
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Services Section -->
-        <section class="services-section">
+        <section id="products" class="products">
+            <h2>Our Products</h2>
+            <div class="product-grid" id="productGrid">
+                <!-- Products will be dynamically populated -->
+            </div>
+        </section>
+
+        <!-- Store Info Section -->
+        <section class="store-info">
             <div class="container">
-                <h2>What We Offer</h2>
-                <div class="services-grid">
-                    <div class="service-item">
-                        <i class="fas fa-mobile-alt"></i>
-                        <h4>Mobile Phones</h4>
-                        <p>Latest smartphones from all major brands</p>
+                <h2>Visit Samal Mobile</h2>
+                <div class="store-details">
+                    <div class="store-card">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Location</h3>
+                        <p>Rimuli, Keonjhar District<br>Odisha, India</p>
                     </div>
-                    <div class="service-item">
-                        <i class="fas fa-headphones"></i>
-                        <h4>Accessories</h4>
-                        <p>Cases, chargers, earphones & more</p>
+                    <div class="store-card">
+                        <i class="fas fa-clock"></i>
+                        <h3>Hours</h3>
+                        <p>Mon-Sat: 9:00 AM - 8:00 PM<br>Sunday: 10:00 AM - 6:00 PM</p>
                     </div>
-                    <div class="service-item">
-                        <i class="fas fa-tools"></i>
-                        <h4>Repairs</h4>
-                        <p>Expert mobile repair services</p>
-                    </div>
-                    <div class="service-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <h4>Warranty</h4>
-                        <p>Reliable warranty support</p>
+                    <div class="store-card">
+                        <i class="fas fa-phone"></i>
+                        <h3>Contact</h3>
+                        <p><a href="tel:+919938008008">+91-9938008008</a><br>
+                        <a href="https://wa.me/919938008008">WhatsApp</a></p>
                     </div>
                 </div>
             </div>
@@ -261,6 +191,6 @@
         </div>
     </footer>
 
-    <script src="contact.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
