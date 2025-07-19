@@ -132,13 +132,239 @@ let currentFilters = {
 
 let filteredProducts = [...products];
 
+// Dark Theme Management
+class ThemeManager {
+    constructor() {
+        this.initTheme();
+        this.setupToggle();
+    }
+
+    initTheme() {
+        // Check for saved theme or default to light mode
+        const savedTheme = localStorage.getItem('samal-mobile-theme') || 'light';
+        this.setTheme(savedTheme);
+    }
+
+    setupToggle() {
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+            });
+        }
+    }
+
+    setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('samal-mobile-theme', theme);
+        
+        // Update toggle button icon
+        const toggleIcon = document.querySelector('#theme-toggle i');
+        if (toggleIcon) {
+            toggleIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    }
+}
+
+// Mobile Navigation Management
+class MobileNavManager {
+    constructor() {
+        this.setupMobileNav();
+    }
+
+    setupMobileNav() {
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+        
+        if (hamburger && navMenu) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                
+                // Prevent body scroll when menu is open
+                if (navMenu.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Close menu when clicking on links
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+    }
+}
+
+// Contact Form Management
+class ContactFormManager {
+    constructor() {
+        this.setupContactForm();
+        this.setupPhoneValidation();
+    }
+
+    setupContactForm() {
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', this.handleFormSubmit.bind(this));
+        }
+    }
+
+    async handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.querySelector('.submit-btn');
+        const originalText = submitBtn.innerHTML;
+        
+        // Show loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+        
+        // Get form data
+        const formData = new FormData(e.target);
+        const data = {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            email: formData.get('email'),
+            subject: formData.get('subject'),
+            message: formData.get('message'),
+            updates: formData.get('updates') ? true : false
+        };
+        
+        try {
+            // Simulate form submission
+            await this.simulateFormSubmission(data);
+            
+            // Success feedback
+            this.showNotification('Message sent successfully! We\'ll get back to you soon.', 'success');
+            e.target.reset();
+            
+            // WhatsApp option
+            setTimeout(() => {
+                if (confirm('Would you like to also send this message via WhatsApp for faster response?')) {
+                    const whatsappMessage = this.formatWhatsAppMessage(data);
+                    window.open(`https://wa.me/919938008008?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
+                }
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Form submission error:', error);
+            this.showNotification('Failed to send message. Please try calling us directly at +91-9938008008.', 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    formatWhatsAppMessage(data) {
+        return `Hi Samal Mobile,
+
+Name: ${data.name}
+Phone: ${data.phone}
+Subject: ${data.subject}
+
+Message: ${data.message}
+
+Please get back to me at your earliest convenience.`;
+    }
+
+    simulateFormSubmission(data) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                console.log('Form data:', data);
+                resolve();
+            }, 2000);
+        });
+    }
+
+    setupPhoneValidation() {
+        const phoneInput = document.getElementById('phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) value = value.slice(0, 10);
+                e.target.value = value;
+            });
+            
+            phoneInput.addEventListener('blur', (e) => {
+                const value = e.target.value;
+                if (value.length > 0 && value.length < 10) {
+                    e.target.setCustomValidity('Please enter a valid 10-digit phone number');
+                } else {
+                    e.target.setCustomValidity('');
+                }
+            });
+        }
+    }
+
+    showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+            ${message}
+        `;
+        
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: type === 'success' ? '#10b981' : '#ef4444',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            borderRadius: '8px',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+            zIndex: '10001',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: '600',
+            transform: 'translateX(400px)',
+            transition: 'transform 0.3s ease',
+            maxWidth: '400px'
+        });
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.transform = 'translateX(0)', 100);
+        setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => document.body.contains(notification) && document.body.removeChild(notification), 300);
+        }, 5000);
+    }
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Samal Mobile Website Loading...');
+    
+    // Initialize all managers
+    new ThemeManager();
+    new MobileNavManager();
+    new ContactFormManager();
+    
+    // Initialize existing functionality
     setupEventListeners();
     initializePriceRange();
     renderProducts(products);
     updateResultsCount();
+    
     console.log('Samal Mobile Website Loaded Successfully!');
 });
 
@@ -187,25 +413,6 @@ function setupEventListeners() {
     if (maxPriceInput) {
         maxPriceInput.addEventListener('change', handlePriceInputs);
     }
-
-    // Mobile menu toggle
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
-    
-    if (hamburger && navMenu) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-        
-        // Close menu when clicking on links
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
-    }
 }
 
 // Initialize price range based on product data
@@ -242,18 +449,9 @@ function initializePriceRange() {
 
 // Handle brand filtering
 function handleBrandFilter(e) {
-    // Remove active class from all buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Add active class to clicked button
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     e.target.classList.add('active');
-    
-    // Update filter state
     currentFilters.brand = e.target.dataset.brand;
-    
-    // Apply all filters
     applyAllFilters();
 }
 
@@ -282,13 +480,8 @@ function handlePriceInputs() {
     const minPrice = parseInt(minPriceInput?.value) || 0;
     const maxPrice = parseInt(maxPriceInput?.value) || 200000;
     
-    // Update slider position
-    if (priceRange) {
-        priceRange.value = maxPrice;
-    }
-    if (currentMaxPrice) {
-        currentMaxPrice.textContent = `₹${maxPrice.toLocaleString()}`;
-    }
+    if (priceRange) priceRange.value = maxPrice;
+    if (currentMaxPrice) currentMaxPrice.textContent = `₹${maxPrice.toLocaleString()}`;
 }
 
 // Handle sorting
@@ -301,18 +494,15 @@ function handleSort(e) {
 function applyAllFilters() {
     let filtered = [...products];
     
-    // Apply brand filter
     if (currentFilters.brand !== 'all') {
         filtered = filtered.filter(product => product.brand === currentFilters.brand);
     }
     
-    // Apply price filter
     filtered = filtered.filter(product => 
         product.price >= currentFilters.minPrice && 
         product.price <= currentFilters.maxPrice
     );
     
-    // Apply sorting
     switch (currentFilters.sort) {
         case 'price-low':
             filtered.sort((a, b) => a.price - b.price);
@@ -325,9 +515,6 @@ function applyAllFilters() {
             break;
         case 'name-za':
             filtered.sort((a, b) => b.model.localeCompare(a.model));
-            break;
-        default:
-            // Keep original order
             break;
     }
     
@@ -403,7 +590,6 @@ function updateResultsCount() {
 
 // Clear all filters
 function clearAllFilters() {
-    // Reset filter state
     const prices = products.map(p => p.price);
     const maxPrice = Math.max(...prices);
     
@@ -414,11 +600,9 @@ function clearAllFilters() {
         sort: 'default'
     };
     
-    // Reset UI elements
     const allBrandBtn = document.querySelector('.filter-btn[data-brand="all"]');
-    if (allBrandBtn) {
-        allBrandBtn.classList.add('active');
-    }
+    if (allBrandBtn) allBrandBtn.classList.add('active');
+    
     document.querySelectorAll('.filter-btn:not([data-brand="all"])').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -435,7 +619,6 @@ function clearAllFilters() {
     if (currentMaxPrice) currentMaxPrice.textContent = `₹${maxPrice.toLocaleString()}`;
     if (sortSelect) sortSelect.value = 'default';
     
-    // Re-render all products
     renderProducts(products);
     filteredProducts = [...products];
     updateResultsCount();
@@ -446,7 +629,6 @@ function addToCart(productModel, productBrand, productPrice) {
     const button = event.target;
     const originalText = button.textContent;
     
-    // Visual feedback
     button.textContent = 'Added! ✓';
     button.style.background = '#10b981';
     button.disabled = true;
@@ -457,10 +639,8 @@ function addToCart(productModel, productBrand, productPrice) {
         button.disabled = false;
     }, 2000);
     
-    // Here you can add actual cart logic
     console.log(`Added ${productBrand} ${productModel} (₹${productPrice}) to cart`);
     
-    // Optional: Show WhatsApp message option
     setTimeout(() => {
         if (confirm(`Product added to cart! Would you like to inquire about ${productBrand} ${productModel} via WhatsApp?`)) {
             const message = `Hi Samal Mobile, I'm interested in ${productBrand} ${productModel} priced at ₹${productPrice}. Please provide more details.`;
@@ -469,7 +649,7 @@ function addToCart(productModel, productBrand, productPrice) {
     }, 1000);
 }
 
-// Smooth scrolling for navigation
+// Smooth scrolling
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
