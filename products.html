@@ -3,67 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - Samal Mobile</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Products - Samal Mobile | Mobile & Accessories Store in Rimuli, Keonjhar</title>
+    <meta name="description" content="Browse our complete collection of mobile phones and accessories at Samal Mobile in Rimuli, Keonjhar, Odisha. Samsung, Vivo, Realme, OnePlus, OPPO, Apple phones available.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body data-theme="light">
-    <header>
-        <h1>Samal Mobile</h1>
-        <button id="theme-toggle" class="theme-toggle"><i class="fas fa-moon"></i></button>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="products.html">Products</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2>Samal Mobile</h2>
+                    <span class="location">Rimuli, Keonjhar</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html" class="active">Products</a></li>
+                    <li><a href="index.html#brands">Brands</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="contact-cta">
+                    <a href="tel:+919938008008" class="phone-btn">
+                        <i class="fas fa-phone"></i>
+                        Call Now
+                    </a>
+                </div>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
         </nav>
     </header>
-    <main class="container">
-        <h2>Our Products</h2>
-        <p>Explore all mobile phones and accessories available in India from top brands.</p>
-        <div class="controls">
-            <label for="brand-filter">Filter by Brand:</label>
-            <select id="brand-filter">
-                <option value="all">All Brands</option>
-            </select>
-            <label for="price-filter">Filter by Price Range:</label>
-            <select id="price-filter">
-                <option value="all">All Prices</option>
-                <option value="0-10000">₹0 - ₹10,000</option>
-                <option value="10001-20000">₹10,001 - ₹20,000</option>
-                <option value="20001-50000">₹20,001 - ₹50,000</option>
-                <option value="50001-100000">₹50,001 - ₹1,00,000</option>
-                <option value="100001">₹1,00,001+</option>
-            </select>
-            <label for="sort-by">Sort By:</label>
-            <select id="sort-by">
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name-asc">Model: A to Z</option>
-                <option value="name-desc">Model: Z to A</option>
-            </select>
-        </div>
-        <table class="product-table">
-            <thead>
-                <tr>
-                    <th>Brand</th>
-                    <th>Model</th>
-                    <th>Price (INR)</th>
-                    <th>Back Cover</th>
-                    <th>Back Cover Price (INR)</th>
-                    <th>Front Glass</th>
-                    <th>Front Glass Price (INR)</th>
-                </tr>
-            </thead>
-            <tbody id="product-table-body"></tbody>
-        </table>
+
+    <main class="products-main">
+        <!-- Hero Section -->
+        <section class="products-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Our Complete Product Collection</h1>
+                    <p>Explore all mobile phones and accessories available at Samal Mobile, Rimuli</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter Section -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <h2>Filter Products</h2>
+                
+                <!-- Brand Filter -->
+                <div class="filter-group">
+                    <h3>Brand</h3>
+                    <div class="brand-filters">
+                        <button class="filter-btn active" data-brand="all">All Brands</button>
+                        <button class="filter-btn" data-brand="Samsung">Samsung</button>
+                        <button class="filter-btn" data-brand="Vivo">Vivo</button>
+                        <button class="filter-btn" data-brand="Realme">Realme</button>
+                        <button class="filter-btn" data-brand="OnePlus">OnePlus</button>
+                        <button class="filter-btn" data-brand="OPPO">OPPO</button>
+                        <button class="filter-btn" data-brand="Apple">Apple</button>
+                    </div>
+                </div>
+
+                <!-- Price Range Filter -->
+                <div class="filter-group">
+                    <h3>Price Range</h3>
+                    <div class="price-filter">
+                        <div class="price-shortcuts">
+                            <button class="price-shortcut-btn" data-min="0" data-max="10000">Under ₹10,000</button>
+                            <button class="price-shortcut-btn" data-min="10000" data-max="30000">₹10,000 - ₹30,000</button>
+                            <button class="price-shortcut-btn" data-min="30000" data-max="60000">₹30,000 - ₹60,000</button>
+                            <button class="price-shortcut-btn" data-min="60000" data-max="200000">Above ₹60,000</button>
+                        </div>
+                        <div class="price-inputs">
+                            <div class="price-input-group">
+                                <label for="minPrice">Min Price (₹)</label>
+                                <input type="number" id="minPrice" placeholder="0" min="0">
+                            </div>
+                            <div class="price-input-group">
+                                <label for="maxPrice">Max Price (₹)</label>
+                                <input type="number" id="maxPrice" placeholder="200000" min="0">
+                            </div>
+                        </div>
+                        <div class="price-range-slider">
+                            <input type="range" id="priceRange" min="0" max="200000" value="200000" step="1000">
+                            <div class="price-display">
+                                <span>₹0</span>
+                                <span id="currentMaxPrice">₹200,000</span>
+                            </div>
+                        </div>
+                        <button class="apply-filter-btn">Apply Price Filter</button>
+                    </div>
+                </div>
+
+                <!-- Sort Options -->
+                <div class="filter-group">
+                    <h3>Sort By</h3>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="default">Default</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="name-az">Name: A to Z</option>
+                        <option value="name-za">Name: Z to A</option>
+                        <option value="brand-az">Brand: A to Z</option>
+                    </select>
+                </div>
+
+                <!-- View Toggle -->
+                <div class="filter-group">
+                    <h3>View Style</h3>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="cards">
+                            <i class="fas fa-th"></i> Cards
+                        </button>
+                        <button class="view-btn" data-view="list">
+                            <i class="fas fa-list"></i> List
+                        </button>
+                        <button class="view-btn" data-view="table">
+                            <i class="fas fa-table"></i> Table
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Clear Filters -->
+                <div class="filter-actions">
+                    <button class="clear-filters-btn">Clear All Filters</button>
+                    <div class="results-count">
+                        Showing <span id="resultsCount">0</span> products
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="products-section">
+            <div class="container">
+                <!-- Card View -->
+                <div id="cardView" class="product-grid">
+                    <!-- Products will be dynamically populated -->
+                </div>
+
+                <!-- List View -->
+                <div id="listView" class="product-list hidden">
+                    <!-- Products will be dynamically populated -->
+                </div>
+
+                <!-- Table View -->
+                <div id="tableView" class="product-table-container hidden">
+                    <div class="table-responsive">
+                        <table class="product-table">
+                            <thead>
+                                <tr>
+                                    <th>Brand</th>
+                                    <th>Model</th>
+                                    <th>Price</th>
+                                    <th>Back Cover</th>
+                                    <th>Cover Price</th>
+                                    <th>Screen Glass</th>
+                                    <th>Glass Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody">
+                                <!-- Products will be dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
-    <footer>
-        <p>© 2025 Samal Mobile. All rights reserved.</p>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Samal Mobile</h3>
+                    <p>Your trusted mobile store in Rimuli, Keonjhar, Odisha</p>
+                    <div class="social-links">
+                        <a href="https://wa.me/919938008008" target="_blank">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="tel:+919938008008">
+                            <i class="fas fa-phone"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Rimuli, Keonjhar, Odisha</p>
+                    <p><i class="fas fa-phone"></i> +91-9938008008</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Business Hours</h4>
+                    <p>Mon-Sat: 9:00 AM - 8:00 PM</p>
+                    <p>Sunday: 10:00 AM - 6:00 PM</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 Samal Mobile, Rimuli. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
-    <script src="script.js"></script>
+
+    <script src="products.js"></script>
 </body>
 </html>
