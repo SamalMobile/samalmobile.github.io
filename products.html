@@ -22,7 +22,7 @@
                 <ul class="nav-menu">
                     <li><a href="index.html">Home</a></li>
                     <li><a href="products.html" class="active">Products</a></li>
-                    <li><a href="index.html#brands">Brands</a></li>
+                    <li><a href="about.html">About</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
                 <div class="contact-cta">
@@ -110,24 +110,7 @@
                         <option value="price-high">Price: High to Low</option>
                         <option value="name-az">Name: A to Z</option>
                         <option value="name-za">Name: Z to A</option>
-                        <option value="brand-az">Brand: A to Z</option>
                     </select>
-                </div>
-
-                <!-- View Toggle -->
-                <div class="filter-group">
-                    <h3>View Style</h3>
-                    <div class="view-toggle">
-                        <button class="view-btn active" data-view="cards">
-                            <i class="fas fa-th"></i> Cards
-                        </button>
-                        <button class="view-btn" data-view="list">
-                            <i class="fas fa-list"></i> List
-                        </button>
-                        <button class="view-btn" data-view="table">
-                            <i class="fas fa-table"></i> Table
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Clear Filters -->
@@ -143,37 +126,8 @@
         <!-- Products Section -->
         <section class="products-section">
             <div class="container">
-                <!-- Card View -->
-                <div id="cardView" class="product-grid">
+                <div class="product-grid" id="productGrid">
                     <!-- Products will be dynamically populated -->
-                </div>
-
-                <!-- List View -->
-                <div id="listView" class="product-list hidden">
-                    <!-- Products will be dynamically populated -->
-                </div>
-
-                <!-- Table View -->
-                <div id="tableView" class="product-table-container hidden">
-                    <div class="table-responsive">
-                        <table class="product-table">
-                            <thead>
-                                <tr>
-                                    <th>Brand</th>
-                                    <th>Model</th>
-                                    <th>Price</th>
-                                    <th>Back Cover</th>
-                                    <th>Cover Price</th>
-                                    <th>Screen Glass</th>
-                                    <th>Glass Price</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productTableBody">
-                                <!-- Products will be dynamically populated -->
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </section>
@@ -214,6 +168,6 @@
         </div>
     </footer>
 
-    <script src="products.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
